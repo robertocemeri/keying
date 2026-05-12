@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Keyring</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="dot"></span>
+        <span class="brand-name">Keyring</span>
+      </div>
+      <div id="status-pill" class="pill">…</div>
+    </header>
+
+    <main id="view-status" hidden>
+      <h2 id="status-title">Connecting…</h2>
+      <p id="status-detail">Looking for the Keyring app on your Mac.</p>
+      <button id="btn-pair" class="primary" hidden>Pair with Keyring</button>
+      <button id="btn-retry" class="ghost" hidden>Retry</button>
+    </main>
+
+    <main id="view-pair" hidden>
+      <h2>Enter the code shown in the Keyring app</h2>
+      <p>A 6-digit code should be visible on your Mac right now.</p>
+      <input id="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="• • • • • •" />
+      <div id="pair-err" class="error" hidden></div>
+      <div class="row">
+        <button id="btn-cancel-pair" class="ghost">Cancel</button>
+        <button id="btn-verify" class="primary">Pair</button>
+      </div>
+    </main>
+
+    <main id="view-matches" hidden>
+      <div id="prefs-row" class="prefs-row">
+        <label class="switch">
+          <input type="checkbox" id="pause-toggle" />
+          <span class="track"></span>
+        </label>
+        <div class="prefs-text">
+          <div class="prefs-title">Autofill</div>
+          <div class="prefs-sub" id="prefs-state">On</div>
+        </div>
+      </div>
+      <h2 id="matches-title">Matches on this site</h2>
+      <ul id="matches-list"></ul>
+      <p id="no-matches" class="muted" hidden>No entries for this site yet.</p>
+      <button id="btn-unpair" class="link">Unpair this browser</button>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
