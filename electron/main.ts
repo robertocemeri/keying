@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, globalShortcut, dialog } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, globalShortcut, dialog, nativeImage } from "electron";
 import path from "path";
 import { promises as fs } from "fs";
 import {
@@ -142,11 +142,13 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   if (process.platform === "darwin" && app.dock) {
-    try {
-      const iconPath = path.join(__dirname, "..", "build", "icon-512.png");
-      app.dock.setIcon(iconPath);
-    } catch {
-      /* ignore */
+    const iconPath = path.join(__dirname, "..", "build", "icon-1024.png");
+    const img = nativeImage.createFromPath(iconPath);
+    if (img.isEmpty()) {
+      // eslint-disable-next-line no-console
+      console.warn("[dock-icon] failed to load image at", iconPath);
+    } else {
+      app.dock.setIcon(img);
     }
   }
 
