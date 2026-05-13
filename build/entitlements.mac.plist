@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Electron requires JIT for V8. -->
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+  <!-- Allow loading frameworks signed by us (Electron Helper, etc.). -->
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+  <true/>
+  <key>com.apple.security.cs.disable-library-validation</key>
+  <true/>
+  <!-- keytar needs Keychain access. -->
+  <key>keychain-access-groups</key>
+  <array>
+    <string>$(AppIdentifierPrefix)com.cemeri.keyring</string>
+  </array>
+  <!-- We listen on 127.0.0.1 for the browser extension bridge. -->
+  <key>com.apple.security.network.server</key>
+  <true/>
+  <!-- Auto-updater downloads from GitHub. -->
+  <key>com.apple.security.network.client</key>
+  <true/>
+</dict>
+</plist>

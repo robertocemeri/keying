@@ -2,7 +2,9 @@
   "manifest_version": 3,
   "name": "Keyring",
   "version": "0.1.0",
-  "description": "Autofill credentials from your local Keyring app.",
+  "description": "Autofill from your local Keyring vault. No cloud, no account — credentials live in the Keyring app on your Mac.",
+  "homepage_url": "https://github.com/robertocemeri/keyring",
+  "author": "Roberto Cemeri",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": [
     "http://127.0.0.1:17321/*",
@@ -31,7 +33,7 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "keyring@cemeri.local",
+      "id": "keyring@cemeri.dev",
       "strict_min_version": "115.0"
     }
   }

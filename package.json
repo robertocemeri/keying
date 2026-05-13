@@ -4,12 +4,20 @@
   "version": "0.1.0",
   "description": "Keyring — a local, encrypted password manager for macOS",
   "main": "dist-electron/main.js",
+  "homepage": "https://github.com/robertocemeri/keyring",
+  "author": {
+    "name": "Roberto Cemeri",
+    "email": "robertocemeri29@gmail.com"
+  },
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && electron-builder",
     "start": "vite",
     "electron:dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && tsc -p tsconfig.electron.json && cross-env NODE_ENV=development electron .\"",
-    "electron:build": "tsc -p tsconfig.electron.json && vite build && electron-builder --mac"
+    "electron:build": "tsc -p tsconfig.electron.json && vite build && electron-builder --mac",
+    "extension:zip": "node scripts/build-extension.mjs",
+    "release": "tsc -p tsconfig.electron.json && vite build && electron-builder --mac --publish always"
   },
   "build": {
     "appId": "com.cemeri.keyring",
@@ -22,15 +30,49 @@
       "dist/**/*",
       "dist-electron/**/*",
       "build/icon-*.png",
-      "build/icon.icns"
+      "build/icon.icns",
+      "!**/*.map"
     ],
+    "asar": true,
     "mac": {
       "category": "public.app-category.productivity",
-      "target": "dmg",
-      "icon": "build/icon.icns"
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "notarize": {
+        "teamId": "REPLACE_WITH_YOUR_TEAM_ID"
+      }
+    },
+    "dmg": {
+      "writeUpdateInfo": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "robertocemeri",
+      "repo": "keyring",
+      "releaseType": "release"
     }
   },
   "dependencies": {
+    "electron-updater": "^6.8.3",
     "keytar": "^7.9.0"
   },
   "devDependencies": {
