@@ -45,6 +45,12 @@ function tokensPath(): string {
   return path.join(app.getPath("userData"), TOKENS_FILENAME);
 }
 
+function broadcastToAll(channel: string, ...args: unknown[]): void {
+  for (const w of BrowserWindow.getAllWindows()) {
+    if (!w.isDestroyed()) w.webContents.send(channel, ...args);
+  }
+}
+
 async function loadTokens(): Promise<void> {
   try {
     const raw = await fs.readFile(tokensPath(), "utf8");
@@ -183,8 +189,7 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse): Prom
       pending = null;
     }
     const code = sixDigitCode();
-    const win = BrowserWindow.getAllWindows()[0];
-    win?.webContents.send("bridge:pairing-prompt", { code, client });
+    broadcastToAll("bridge:pairing-prompt", { code, client });
     const tokenPromise = new Promise<string | null>((resolve) => {
       pending = { code, client, createdAt: Date.now(), resolve };
     });
@@ -193,7 +198,7 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse): Prom
       if (pending && pending.code === code) {
         pending.resolve(null);
         pending = null;
-        win?.webContents.send("bridge:pairing-cancelled");
+        broadcastToAll("bridge:pairing-cancelled");
       }
     }, 90_000);
     sendJson(res, 200, { ok: true });
@@ -235,8 +240,7 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse): Prom
     const resolve = pending.resolve;
     pending = null;
     resolve(token);
-    const win = BrowserWindow.getAllWindows()[0];
-    win?.webContents.send("bridge:pairing-completed", { client });
+    broadcastToAll("bridge:pairing-completed", { client });
     sendJson(res, 200, { ok: true, token });
     return;
   }
@@ -271,8 +275,7 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse): Prom
         patch.autofillDisabled = parsed.autofillDisabled || undefined;
       }
       await setGlobalSettings(patch);
-      const win = BrowserWindow.getAllWindows()[0];
-      win?.webContents.send("vault:global-settings-changed", getGlobalSettings());
+      broadcastToAll("vault:global-settings-changed", getGlobalSettings());
       const g = getGlobalSettings();
       sendJson(res, 200, { ok: true, autofillDisabled: !!g.autofillDisabled });
     } catch {

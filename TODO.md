@@ -117,9 +117,9 @@ Run in order. Stop if any step fails and send me the error.
 
 ### G. Auto-update sanity
 
-- [ ] Install v0.1.0 from the DMG
-- [ ] Bump `package.json` version to `0.1.1`, change a tiny visible thing, `npm run release`
-- [ ] Open the installed v0.1.0 → within ~30s it should detect the update and prompt
+- [x] Install v0.1.0 from the DMG
+- [x] Bump `package.json` version to `0.1.1`, change a tiny visible thing, `npm run release`
+- [x] Open the installed v0.1.0 → within ~30s it should detect the update and prompt
 
 ---
 
