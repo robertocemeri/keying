@@ -341,6 +341,22 @@ export function lock(): void {
   cachedData = null;
 }
 
+export async function deleteVaultFile(): Promise<void> {
+  lock();
+  pendingMigrationRecoveryKey = null;
+  try {
+    await fs.unlink(vaultPath());
+  } catch (e) {
+    const err = e as NodeJS.ErrnoException;
+    if (err.code !== "ENOENT") throw err;
+  }
+  try {
+    await fs.unlink(vaultPath() + ".tmp");
+  } catch {
+    /* ignore — temp file may not exist */
+  }
+}
+
 function ensureUnlocked(): { dek: Buffer; data: VaultData } {
   if (!cachedDek || !cachedData) {
     throw new Error("Vault is locked");

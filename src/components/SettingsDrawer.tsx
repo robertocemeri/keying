@@ -123,6 +123,7 @@ function SecuritySection({
   const [hasRecovery, setHasRecovery] = useState(false);
   const [pwModal, setPwModal] = useState(false);
   const [autoLockMinutes, setAutoLockMinutesState] = useState<number>(15);
+  const [resetModal, setResetModal] = useState(false);
 
   async function refresh() {
     const [avail, has, rec, settings] = await Promise.all([
@@ -246,6 +247,27 @@ function SecuritySection({
         </div>
       </Card>
 
+      <div className="border-t border-red-900/40 pt-6 mt-4">
+        <div className="text-[10px] text-red-400 uppercase tracking-[0.18em] font-semibold mb-3">
+          Danger zone
+        </div>
+        <Card
+          title="Factory reset"
+          description="Permanently delete your vault, recovery key, Touch ID setup, and paired browsers. This cannot be undone. Export an encrypted backup first if you want a way back."
+        >
+          <button
+            onClick={() => setResetModal(true)}
+            className="no-drag border border-red-900/60 hover:bg-red-950/50 text-red-300 text-sm rounded-md px-3.5 py-1.5 transition"
+          >
+            Erase everything…
+          </button>
+        </Card>
+      </div>
+
+      {resetModal && (
+        <FactoryResetModal onClose={() => setResetModal(false)} />
+      )}
+
       {pwModal && (
         <ChangePasswordModal
           onClose={() => setPwModal(false)}
@@ -354,6 +376,91 @@ function ChangePasswordModal({
             className="no-drag bg-accent-500 hover:bg-accent-400 disabled:opacity-50 text-ink-950 text-sm font-medium rounded-md px-4 py-2 transition"
           >
             {busy ? "Changing…" : "Change password"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function FactoryResetModal({ onClose }: { onClose: () => void }) {
+  const [confirmation, setConfirmation] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const canConfirm = confirmation.trim().toLowerCase() === "erase";
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!canConfirm) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      await window.vault.factoryReset();
+      // The lock event will trigger boot(), which will see no vault and
+      // route to the setup screen. Close the drawer.
+      onClose();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : String(e));
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] bg-ink-950/85 backdrop-blur grid place-items-center px-6">
+      <form
+        onSubmit={submit}
+        className="bg-ink-900 border border-red-900/60 rounded-xl shadow-2xl w-full max-w-md p-6 space-y-5"
+      >
+        <div className="space-y-1">
+          <div className="text-[10px] text-red-400 uppercase tracking-[0.18em] font-semibold">
+            Danger zone
+          </div>
+          <h2 className="text-lg font-semibold text-ink-100 leading-tight">
+            Erase everything?
+          </h2>
+          <p className="text-xs text-ink-400 leading-relaxed">
+            Your vault file, recovery key, Touch ID setup, and any paired
+            browsers will be permanently deleted. There's no undo. The app will
+            return to the setup screen.
+          </p>
+        </div>
+
+        <label className="block no-drag">
+          <span className="text-xs font-medium uppercase tracking-wider text-ink-400">
+            Type <span className="font-mono text-red-300">erase</span> to confirm
+          </span>
+          <input
+            type="text"
+            value={confirmation}
+            onChange={(e) => setConfirmation(e.target.value)}
+            autoFocus
+            spellCheck={false}
+            autoComplete="off"
+            className="mt-1.5 w-full bg-ink-950 border border-ink-700 focus:border-red-500 focus:ring-1 focus:ring-red-500/30 outline-none rounded-md px-3 py-2 text-ink-100 font-mono"
+          />
+        </label>
+
+        {err && (
+          <div className="text-sm text-red-400 bg-red-950/40 border border-red-900/60 rounded-md px-3 py-2">
+            {err}
+          </div>
+        )}
+
+        <div className="flex items-center justify-end gap-2 pt-1">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={busy}
+            className="no-drag text-sm text-ink-300 hover:text-ink-100 rounded-md px-3 py-2 transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={busy || !canConfirm}
+            className="no-drag bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium rounded-md px-4 py-2 transition"
+          >
+            {busy ? "Erasing…" : "Erase everything"}
           </button>
         </div>
       </form>

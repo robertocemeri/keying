@@ -31,6 +31,7 @@ import {
   bulkAddEntries,
   readEncryptedFileBytes,
   getVaultPath,
+  deleteVaultFile,
   Entry,
 } from "./vault";
 import {
@@ -170,16 +171,15 @@ app.whenReady().then(async () => {
         if (app.dock) app.dock.setIcon(dockImg);
       };
       applyDockIcon();
-      // In dev the bundle identity is Electron.app, so macOS will resync the
-      // Dock icon to the bundle's own icon on certain lifecycle events
-      // (window creation, focus, etc.). Re-apply so it sticks.
-      app.on("browser-window-created", (_e, win) => {
-        applyDockIcon();
-        win.webContents.on("did-finish-load", applyDockIcon);
-        win.on("focus", applyDockIcon);
-      });
-      app.on("activate", applyDockIcon);
-      app.on("browser-window-focus", applyDockIcon);
+      // In dev mode the bundle identity is Electron.app, and macOS resyncs
+      // the Dock representation to the bundle's icon at unpredictable
+      // moments (Touch ID dialog dismissal, Dock badge refresh, system
+      // events). Lifecycle listeners don't catch all of them. Reapply on a
+      // short interval — wasteful but the only reliable approach. In a
+      // packaged build the bundle is Keyring.app, so this isn't needed.
+      if (isDev) {
+        setInterval(applyDockIcon, 1000);
+      }
     }
   }
 
@@ -372,6 +372,26 @@ ipcMain.handle("vault:takePendingRecoveryKey", () => takePendingRecoveryKey());
 ipcMain.handle("vault:lock", () => {
   lock();
   clearAutoLockTimer();
+  return { ok: true };
+});
+
+ipcMain.handle("vault:factoryReset", async () => {
+  clearAutoLockTimer();
+  hideOverlay();
+  // Revoke paired browser tokens. Best-effort — don't block the wipe if it fails.
+  try {
+    await revokeAllTokens();
+  } catch {
+    /* ignore */
+  }
+  // Remove Touch ID keychain entry. Best-effort.
+  try {
+    await deleteStoredKey();
+  } catch {
+    /* ignore */
+  }
+  await deleteVaultFile();
+  broadcast("vault:auto-locked");
   return { ok: true };
 });
 

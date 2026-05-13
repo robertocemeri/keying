@@ -82,6 +82,7 @@ declare global {
       rotateRecoveryKey(): Promise<{ recoveryKey: string }>;
       takePendingRecoveryKey(): Promise<string | null>;
       lock(): Promise<{ ok: true }>;
+      factoryReset(): Promise<{ ok: true }>;
       list(): Promise<Entry[]>;
       add(entry: Omit<Entry, "id" | "createdAt" | "updatedAt">): Promise<Entry>;
       update(id: string, patch: Partial<Entry>): Promise<Entry>;

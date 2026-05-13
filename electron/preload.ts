@@ -14,6 +14,7 @@ const api = {
   rotateRecoveryKey: () => ipcRenderer.invoke("vault:rotateRecoveryKey"),
   takePendingRecoveryKey: () => ipcRenderer.invoke("vault:takePendingRecoveryKey"),
   lock: () => ipcRenderer.invoke("vault:lock"),
+  factoryReset: () => ipcRenderer.invoke("vault:factoryReset"),
   list: () => ipcRenderer.invoke("vault:list"),
   add: (entry: unknown) => ipcRenderer.invoke("vault:add", entry),
   update: (id: string, patch: unknown) => ipcRenderer.invoke("vault:update", id, patch),
