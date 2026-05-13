@@ -14,7 +14,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build && electron-builder",
     "start": "vite",
-    "electron:dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && tsc -p tsconfig.electron.json && cross-env NODE_ENV=development electron .\"",
+    "setup:dev-icon": "node scripts/setup-dev-icon.mjs",
+    "electron:dev": "npm run setup:dev-icon && concurrently -k \"vite\" \"wait-on tcp:5173 && tsc -p tsconfig.electron.json && cross-env NODE_ENV=development electron .\"",
     "electron:build": "tsc -p tsconfig.electron.json && vite build && electron-builder --mac",
     "extension:zip": "node scripts/build-extension.mjs",
     "release": "tsc -p tsconfig.electron.json && vite build && electron-builder --mac --publish always"

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, globalShortcut, dialog, nativeImage } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, globalShortcut, dialog } from "electron";
 import path from "path";
 import { promises as fs } from "fs";
 import {
@@ -160,28 +160,11 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
-  if (process.platform === "darwin" && app.dock) {
-    const iconPath = path.join(__dirname, "..", "build", "icon-1024.png");
-    const dockImg = nativeImage.createFromPath(iconPath);
-    if (dockImg.isEmpty()) {
-      // eslint-disable-next-line no-console
-      console.warn("[dock-icon] failed to load image at", iconPath);
-    } else {
-      const applyDockIcon = () => {
-        if (app.dock) app.dock.setIcon(dockImg);
-      };
-      applyDockIcon();
-      // In dev mode the bundle identity is Electron.app, and macOS resyncs
-      // the Dock representation to the bundle's icon at unpredictable
-      // moments (Touch ID dialog dismissal, Dock badge refresh, system
-      // events). Lifecycle listeners don't catch all of them. Reapply on a
-      // short interval — wasteful but the only reliable approach. In a
-      // packaged build the bundle is Keyring.app, so this isn't needed.
-      if (isDev) {
-        setInterval(applyDockIcon, 1000);
-      }
-    }
-  }
+  // Dock icon: in dev, scripts/setup-dev-icon.mjs swaps the Electron bundle's
+  // icon for ours before launch, so macOS uses it natively (no runtime
+  // override needed). In a packaged build the bundle is Keyring.app and the
+  // .icns is set via electron-builder's mac.icon. Either way, no setIcon
+  // call here.
 
   setOverlayDev(isDev);
   createOverlay();
