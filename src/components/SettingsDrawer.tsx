@@ -554,18 +554,43 @@ function BackupSection() {
     if (r.ok) setStatus(`Saved ${formatBytes(r.bytes ?? 0)} backup to ${r.path}`);
   }
 
+  async function restoreBackup() {
+    setStatus(null);
+    if (
+      !window.confirm(
+        "Restore from encrypted backup?\n\nThis will REPLACE your current vault entirely. The backup will be unlocked with the master password (or recovery key) that was active when it was created. Any entries currently in this vault will be lost — export an encrypted backup first if you want to keep them.\n\nProceed?"
+      )
+    )
+      return;
+    const r = await window.vault.restoreEncryptedBackup();
+    if (r.cancelled) return;
+    if (r.ok) {
+      setStatus("Restored. The vault is now locked — unlock with your old master password.");
+    } else if (r.error) {
+      setStatus(`Restore failed: ${r.error}`);
+    }
+  }
+
   return (
     <>
       <Card
         title="Encrypted backup"
-        description="A copy of vault.enc. The same master password (or recovery key) unlocks it on any Mac. Drop it back into Keying's Application Support directory to restore."
+        description="A copy of vault.enc. The same master password (or recovery key) unlocks it on any Mac. Restore replaces your current vault entirely."
       >
-        <button
-          onClick={exportBackup}
-          className="no-drag bg-accent-500 hover:bg-accent-400 text-ink-950 text-sm font-medium rounded-md px-4 py-2 transition"
-        >
-          Export encrypted backup…
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={exportBackup}
+            className="no-drag bg-accent-500 hover:bg-accent-400 text-ink-950 text-sm font-medium rounded-md px-4 py-2 transition"
+          >
+            Export encrypted backup…
+          </button>
+          <button
+            onClick={restoreBackup}
+            className="no-drag border border-ink-700 hover:bg-ink-800 text-ink-100 text-sm rounded-md px-4 py-2 transition"
+          >
+            Restore from backup…
+          </button>
+        </div>
       </Card>
 
       <Card

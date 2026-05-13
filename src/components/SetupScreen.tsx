@@ -113,6 +113,25 @@ export default function SetupScreen({ onDone }: { onDone: () => void }) {
         >
           {busy ? "Creating…" : "Create vault"}
         </button>
+
+        <div className="pt-2 border-t border-ink-800 text-center">
+          <button
+            type="button"
+            onClick={async () => {
+              setErr(null);
+              const r = await window.vault.restoreEncryptedBackup();
+              if (r.cancelled) return;
+              if (r.ok) {
+                onDone();
+              } else if (r.error) {
+                setErr(`Restore failed: ${r.error}`);
+              }
+            }}
+            className="no-drag text-sm text-ink-400 hover:text-ink-200 transition py-2"
+          >
+            Already have a backup? Restore from .enc file
+          </button>
+        </div>
       </form>
     </div>
   );

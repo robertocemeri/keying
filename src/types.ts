@@ -123,6 +123,7 @@ declare global {
       exportCsv(): Promise<{ ok: boolean; count?: number; path?: string }>;
       exportBitwardenJson(): Promise<{ ok: boolean; count?: number; path?: string }>;
       exportEncryptedBackup(): Promise<{ ok: boolean; path?: string; bytes?: number }>;
+      restoreEncryptedBackup(): Promise<{ ok: boolean; cancelled?: boolean; error?: string }>;
       printRecoveryKey(recoveryKey: string): Promise<{ ok: boolean }>;
       copyToClipboard(value: string): void;
       clearClipboard(): void;

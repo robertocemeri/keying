@@ -32,6 +32,7 @@ import {
   readEncryptedFileBytes,
   getVaultPath,
   deleteVaultFile,
+  restoreFromBackup,
   Entry,
 } from "./vault";
 import {
@@ -519,6 +520,37 @@ ipcMain.handle("vault:exportBackup", async () => {
   const bytes = await readEncryptedFileBytes();
   await fs.writeFile(res.filePath, bytes, { mode: 0o600 });
   return { ok: true, path: res.filePath, bytes: bytes.length };
+});
+
+ipcMain.handle("vault:restoreBackup", async () => {
+  const res = await dialog.showOpenDialog({
+    title: "Restore from encrypted backup",
+    properties: ["openFile"],
+    filters: [{ name: "Encrypted backup", extensions: ["enc"] }],
+  });
+  if (res.canceled || res.filePaths.length === 0) return { ok: false, cancelled: true };
+  const backupPath = res.filePaths[0];
+  // Restored vault is by definition a different vault — revoke any tokens
+  // previously paired with the old one. Best-effort.
+  try {
+    await revokeAllTokens();
+  } catch {
+    /* ignore */
+  }
+  try {
+    await deleteStoredKey();
+  } catch {
+    /* ignore */
+  }
+  try {
+    await restoreFromBackup(backupPath);
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+  clearAutoLockTimer();
+  hideOverlay();
+  broadcast("vault:auto-locked");
+  return { ok: true };
 });
 
 ipcMain.handle("system:printRecoveryKey", async (_e, recoveryKey: string) => {

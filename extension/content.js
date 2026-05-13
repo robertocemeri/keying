@@ -362,6 +362,97 @@
     });
   }
 
+  // --- Generate-password chip for signup forms ---
+
+  let genChip = null;
+  let currentNewPwField = null;
+
+  function findNewPasswordField() {
+    // Strongest signal: autocomplete="new-password"
+    const byAutocomplete = Array.from(
+      document.querySelectorAll('input[type="password"][autocomplete*="new-password" i]')
+    ).find((el) => el.offsetParent !== null && !el.disabled && !el.readOnly);
+    if (byAutocomplete) return byAutocomplete;
+
+    // Fallback: two visible password fields on the page = likely signup with confirm
+    const pwFields = Array.from(document.querySelectorAll("input[type=password]")).filter(
+      (el) => el.offsetParent !== null && !el.disabled && !el.readOnly
+    );
+    if (pwFields.length >= 2) return pwFields[0];
+
+    // Fallback: name/id/aria hints at "new" / "create" / "signup" / "register"
+    const SIGNUP_RE = /(new|create|signup|sign-?up|register|choose)/i;
+    for (const el of pwFields) {
+      const haystack = `${el.name || ""} ${el.id || ""} ${el.getAttribute("aria-label") || ""} ${el.placeholder || ""}`;
+      if (SIGNUP_RE.test(haystack)) return el;
+    }
+    return null;
+  }
+
+  function findConfirmPasswordField(primary) {
+    const pwFields = Array.from(document.querySelectorAll("input[type=password]")).filter(
+      (el) => el !== primary && el.offsetParent !== null && !el.disabled && !el.readOnly
+    );
+    return pwFields[0] || null;
+  }
+
+  function removeGenChip() {
+    if (genChip && genChip.parentNode) genChip.parentNode.removeChild(genChip);
+    genChip = null;
+    currentNewPwField = null;
+  }
+
+  function positionGenChipNear(input) {
+    if (!genChip || !input) return;
+    const rect = input.getBoundingClientRect();
+    genChip.style.top = window.scrollY + rect.top + rect.height / 2 - 14 + "px";
+    genChip.style.left = window.scrollX + rect.right - 30 + "px";
+  }
+
+  async function fillGenerated(field) {
+    const res = await chrome.runtime.sendMessage({ type: "generate", length: 24 });
+    if (!res?.ok) {
+      if (res?.status === 423) toast("Keying is locked.");
+      else if (res?.status === 401) toast("Pair this browser with Keying first.");
+      else toast("Couldn't generate password.");
+      return;
+    }
+    field.focus();
+    dispatchInput(field, res.password);
+    const confirm = findConfirmPasswordField(field);
+    if (confirm) {
+      dispatchInput(confirm, res.password);
+    }
+    toast("Generated · save the form to add it to Keying");
+  }
+
+  function checkGenerate() {
+    // Don't show on login forms — only signup-shaped pages
+    const field = findNewPasswordField();
+    if (!field) {
+      if (genChip) removeGenChip();
+      return;
+    }
+    if (genChip && currentNewPwField === field) {
+      positionGenChipNear(field);
+      return;
+    }
+    removeGenChip();
+    genChip = document.createElement("div");
+    genChip.className = "__pv-chip __pv-chip-gen";
+    genChip.setAttribute("role", "button");
+    genChip.setAttribute("aria-label", "Generate strong password");
+    genChip.tabIndex = 0;
+    genChip.innerHTML = `
+      <span class="__pv-icon" aria-hidden="true">✨</span>
+      <span class="__pv-text">Generate</span>
+    `;
+    document.body.appendChild(genChip);
+    currentNewPwField = field;
+    positionGenChipNear(field);
+    genChip.addEventListener("click", () => fillGenerated(field));
+  }
+
   // Re-check on DOM changes (SPA login flows, modals)
   let scheduled = false;
   const observer = new MutationObserver(() => {
@@ -371,6 +462,7 @@
       scheduled = false;
       check();
       checkTotpFill();
+      checkGenerate();
     }, 150);
   });
   observer.observe(document.documentElement, { childList: true, subtree: true });
@@ -379,15 +471,18 @@
     const pair = findFirstLoginPair();
     if (pair && chip) positionChipNear(pair.user || pair.pw);
     if (totpChip && currentOtpInput) positionTotpChipNear(currentOtpInput);
+    if (genChip && currentNewPwField) positionGenChipNear(currentNewPwField);
   }, true);
   window.addEventListener("resize", () => {
     const pair = findFirstLoginPair();
     if (pair && chip) positionChipNear(pair.user || pair.pw);
     if (totpChip && currentOtpInput) positionTotpChipNear(currentOtpInput);
+    if (genChip && currentNewPwField) positionGenChipNear(currentNewPwField);
   });
 
   check();
   checkTotpFill();
+  checkGenerate();
 
   // --- "Save new login" detection ---
 

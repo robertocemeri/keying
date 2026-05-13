@@ -41,6 +41,16 @@
   font-size: 11px;
   letter-spacing: 0.04em;
 }
+.__pv-chip-gen {
+  border-color: rgba(163, 230, 53, 0.5);
+  background: #0f1a05;
+  color: #d9f99d;
+}
+.__pv-chip-gen:hover {
+  background: #1a2a08;
+  border-color: rgba(163, 230, 53, 0.7);
+  color: #ecfccb;
+}
 .__pv-chip .__pv-icon {
   font-size: 14px;
 }

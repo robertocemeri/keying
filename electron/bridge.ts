@@ -13,6 +13,7 @@ import {
   Entry,
 } from "./vault";
 import { totpAt } from "./totp";
+import { generatePassword } from "./crypto";
 
 const PORT = 17321;
 const TOKENS_FILENAME = "bridge-tokens.json";
@@ -335,6 +336,22 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse): Prom
         url: entry.url,
       },
     });
+    return;
+  }
+
+  if (route === "GET /generate") {
+    const length = Math.min(
+      Math.max(parseInt(url.searchParams.get("length") ?? "20", 10) || 20, 8),
+      128
+    );
+    const password = generatePassword({
+      length,
+      uppercase: true,
+      lowercase: true,
+      digits: true,
+      symbols: true,
+    });
+    sendJson(res, 200, { ok: true, password });
     return;
   }
 

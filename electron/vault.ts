@@ -624,3 +624,34 @@ export async function changeMasterPassword(
 export async function readEncryptedFileBytes(): Promise<Buffer> {
   return fs.readFile(vaultPath());
 }
+
+export async function restoreFromBackup(backupPath: string): Promise<void> {
+  const buf = await fs.readFile(backupPath);
+  // Validate it parses as a vault file (v1 or v2 shape) before overwriting.
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(buf.toString("utf8"));
+  } catch {
+    throw new Error("Backup file is not valid — could not parse as JSON.");
+  }
+  const obj = parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : null;
+  if (!obj) throw new Error("Backup file is not a valid vault.");
+  if (obj.v === 1) {
+    if (typeof obj.saltB64 !== "string" || !obj.blob) {
+      throw new Error("Backup file is not a valid v1 vault.");
+    }
+  } else if (obj.v === 2) {
+    if (!obj.pw || !obj.blob) {
+      throw new Error("Backup file is not a valid v2 vault.");
+    }
+  } else {
+    throw new Error(`Backup file has unsupported version: ${String(obj.v)}`);
+  }
+  // Lock any currently-unlocked state so the next unlock uses the restored data.
+  lock();
+  pendingMigrationRecoveryKey = null;
+  // Write via the same atomic-rename path as normal saves.
+  const tmp = vaultPath() + ".tmp";
+  await fs.writeFile(tmp, buf, { mode: 0o600 });
+  await fs.rename(tmp, vaultPath());
+}

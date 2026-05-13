@@ -133,6 +133,13 @@ async function totp(id) {
   return { ok: false, error: body.error || "totp-failed", status };
 }
 
+async function generate(length) {
+  const len = Math.min(Math.max(parseInt(length, 10) || 20, 8), 128);
+  const { status, body } = await authedJson("/generate?length=" + len);
+  if (status === 200) return { ok: true, password: body.password };
+  return { ok: false, error: body.error || "generate-failed", status };
+}
+
 // Message routing from popup + content scripts
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   (async () => {
@@ -171,6 +178,9 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           return;
         case "totp":
           sendResponse(await totp(msg.id));
+          return;
+        case "generate":
+          sendResponse(await generate(msg.length));
           return;
         default:
           sendResponse({ ok: false, error: "unknown-message" });

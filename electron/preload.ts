@@ -68,6 +68,7 @@ const api = {
   exportCsv: () => ipcRenderer.invoke("vault:exportCsv"),
   exportBitwardenJson: () => ipcRenderer.invoke("vault:exportBitwardenJson"),
   exportEncryptedBackup: () => ipcRenderer.invoke("vault:exportBackup"),
+  restoreEncryptedBackup: () => ipcRenderer.invoke("vault:restoreBackup"),
   printRecoveryKey: (recoveryKey: string) =>
     ipcRenderer.invoke("system:printRecoveryKey", recoveryKey),
   copyToClipboard: (value: string) => {
