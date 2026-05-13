@@ -122,16 +122,26 @@ function SecuritySection({
   const [touchIDEnabled, setTouchIDEnabled] = useState(false);
   const [hasRecovery, setHasRecovery] = useState(false);
   const [pwModal, setPwModal] = useState(false);
+  const [autoLockMinutes, setAutoLockMinutesState] = useState<number>(15);
 
   async function refresh() {
-    const [avail, has, rec] = await Promise.all([
+    const [avail, has, rec, settings] = await Promise.all([
       window.vault.isTouchIDAvailable(),
       window.vault.hasTouchIDSetup(),
       window.vault.hasRecoveryKey(),
+      window.vault.getGlobalSettings(),
     ]);
     setTouchIDAvailable(avail);
     setTouchIDEnabled(has);
     setHasRecovery(rec);
+    setAutoLockMinutesState(
+      settings.autoLockMinutes === undefined ? 15 : settings.autoLockMinutes
+    );
+  }
+
+  async function changeAutoLock(minutes: number) {
+    setAutoLockMinutesState(minutes);
+    await window.vault.setGlobalSettings({ autoLockMinutes: minutes });
   }
 
   useEffect(() => {
@@ -190,6 +200,34 @@ function SecuritySection({
           </div>
         </Card>
       )}
+
+      <Card
+        title="Auto-lock"
+        description="Lock the vault automatically after a period of inactivity. You'll need your password or Touch ID to unlock again."
+      >
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-ink-200">
+            {autoLockMinutes === 0
+              ? "Never"
+              : autoLockMinutes === 1
+              ? "After 1 minute"
+              : `After ${autoLockMinutes} minutes`}
+          </span>
+          <select
+            value={autoLockMinutes}
+            onChange={(e) => changeAutoLock(Number(e.target.value))}
+            className="no-drag bg-ink-900 border border-ink-700 hover:bg-ink-800 text-ink-100 text-sm rounded-md px-3 py-1.5 transition focus:outline-none focus:border-accent-500"
+          >
+            <option value={0}>Never</option>
+            <option value={1}>1 minute</option>
+            <option value={5}>5 minutes</option>
+            <option value={15}>15 minutes</option>
+            <option value={30}>30 minutes</option>
+            <option value={60}>1 hour</option>
+            <option value={240}>4 hours</option>
+          </select>
+        </div>
+      </Card>
 
       <Card
         title="Recovery key"

@@ -69,7 +69,20 @@ import {
 } from "./updater";
 
 const isDev = process.env.NODE_ENV === "development";
-const AUTO_LOCK_MS = 5 * 60 * 1000;
+const DEFAULT_AUTO_LOCK_MINUTES = 15;
+
+function currentAutoLockMs(): number | null {
+  if (!isUnlocked()) return null;
+  let configured: number | undefined;
+  try {
+    configured = getGlobalSettings().autoLockMinutes;
+  } catch {
+    configured = undefined;
+  }
+  const minutes = configured === undefined ? DEFAULT_AUTO_LOCK_MINUTES : configured;
+  if (minutes <= 0) return null; // "Never"
+  return minutes * 60 * 1000;
+}
 
 app.setName("Keyring");
 
@@ -87,14 +100,19 @@ export function broadcastGlobalSettings() {
 }
 
 function resetAutoLockTimer() {
-  if (autoLockTimer) clearTimeout(autoLockTimer);
+  if (autoLockTimer) {
+    clearTimeout(autoLockTimer);
+    autoLockTimer = null;
+  }
+  const ms = currentAutoLockMs();
+  if (ms === null) return;
   autoLockTimer = setTimeout(() => {
     if (isUnlocked()) {
       lock();
       broadcast("vault:auto-locked");
       hideOverlay();
     }
-  }, AUTO_LOCK_MS);
+  }, ms);
 }
 
 function clearAutoLockTimer() {
@@ -143,12 +161,23 @@ function createWindow() {
 app.whenReady().then(async () => {
   if (process.platform === "darwin" && app.dock) {
     const iconPath = path.join(__dirname, "..", "build", "icon-1024.png");
-    const img = nativeImage.createFromPath(iconPath);
-    if (img.isEmpty()) {
+    const dockImg = nativeImage.createFromPath(iconPath);
+    if (dockImg.isEmpty()) {
       // eslint-disable-next-line no-console
       console.warn("[dock-icon] failed to load image at", iconPath);
     } else {
-      app.dock.setIcon(img);
+      const applyDockIcon = () => {
+        if (app.dock) app.dock.setIcon(dockImg);
+      };
+      applyDockIcon();
+      // In dev the bundle identity is Electron.app, so macOS will resync the
+      // Dock icon to the bundle's own icon on certain lifecycle events
+      // (window creation, focus, etc.). Re-apply so it sticks.
+      app.on("browser-window-created", (_e, win) => {
+        applyDockIcon();
+        win.webContents.on("did-finish-load", applyDockIcon);
+      });
+      app.on("activate", applyDockIcon);
     }
   }
 

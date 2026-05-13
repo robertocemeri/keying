@@ -34,6 +34,7 @@ export type FolderSettings = {
 
 export type GlobalSettings = {
   autofillDisabled?: boolean;
+  autoLockMinutes?: number;
 };
 
 export type GeneratorOptions = {

@@ -30,6 +30,9 @@ export type FolderSettings = {
 
 export type GlobalSettings = {
   autofillDisabled?: boolean;
+  // Minutes of inactivity before the vault auto-locks. 0 = never.
+  // Undefined means "use default" (15 min).
+  autoLockMinutes?: number;
 };
 
 type VaultData = {
@@ -78,8 +81,13 @@ function migrateData(raw: unknown): VaultData {
     obj.globalSettings && typeof obj.globalSettings === "object"
       ? (obj.globalSettings as Record<string, unknown>)
       : {};
+  const rawAutoLock = globalSettingsRaw.autoLockMinutes;
   const globalSettings: GlobalSettings = {
     autofillDisabled: globalSettingsRaw.autofillDisabled === true ? true : undefined,
+    autoLockMinutes:
+      typeof rawAutoLock === "number" && Number.isFinite(rawAutoLock) && rawAutoLock >= 0
+        ? Math.floor(rawAutoLock)
+        : undefined,
   };
   return { entries, folders, folderSettings, globalSettings };
 }
