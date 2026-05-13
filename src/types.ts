@@ -134,6 +134,7 @@ declare global {
       listPairedClients(): Promise<PairedClient[]>;
       revokeAllPairedClients(): Promise<void>;
       cancelPairing(): Promise<void>;
+      startPairingFromApp(): Promise<{ code: string; expiresAt: number }>;
       updaterStatus(): Promise<UpdateStatus>;
       updaterCheck(): Promise<UpdateStatus>;
       updaterInstall(): Promise<{ ok: true }>;

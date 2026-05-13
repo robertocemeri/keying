@@ -53,6 +53,7 @@ import {
   listPairedClients,
   revokeAllTokens,
   cancelPendingPairing,
+  startPairingFromApp,
 } from "./bridge";
 import {
   createOverlay,
@@ -637,6 +638,7 @@ ipcMain.handle("overlay:show", () => {
 ipcMain.handle("bridge:listClients", () => listPairedClients());
 ipcMain.handle("bridge:revokeAll", () => revokeAllTokens());
 ipcMain.handle("bridge:cancelPairing", () => cancelPendingPairing());
+ipcMain.handle("bridge:startPairingFromApp", () => startPairingFromApp("Browser (app-initiated)"));
 
 ipcMain.handle("vault:listFolders", () => {
   resetAutoLockTimer();

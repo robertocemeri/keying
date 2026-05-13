@@ -100,6 +100,7 @@ const api = {
   listPairedClients: () => ipcRenderer.invoke("bridge:listClients"),
   revokeAllPairedClients: () => ipcRenderer.invoke("bridge:revokeAll"),
   cancelPairing: () => ipcRenderer.invoke("bridge:cancelPairing"),
+  startPairingFromApp: () => ipcRenderer.invoke("bridge:startPairingFromApp"),
   hideOverlay: () => ipcRenderer.invoke("overlay:hide"),
   showOverlay: () => ipcRenderer.invoke("overlay:show"),
   onOverlayShown: (cb: () => void) => {

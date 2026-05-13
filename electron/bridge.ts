@@ -82,6 +82,39 @@ function sixDigitCode(): string {
   return n.toString().padStart(6, "0");
 }
 
+// App-initiated pairing: the user clicks "Pair new browser" inside the app
+// and gets a code synchronously, with no dependency on IPC events between
+// the bridge HTTP request and the renderer. Used as a fallback when the
+// extension-initiated pair flow's IPC event gets lost or the renderer
+// subscription isn't ready. Returns the code (and replaces any previous
+// pending pairing).
+export function startPairingFromApp(client: string): {
+  code: string;
+  expiresAt: number;
+} {
+  if (pending) {
+    pending.resolve(null);
+    pending = null;
+  }
+  const code = sixDigitCode();
+  pending = {
+    code,
+    client,
+    createdAt: Date.now(),
+    resolve: () => {},
+  };
+  // Still broadcast in case any renderer is listening — harmless if not.
+  broadcastToAll("bridge:pairing-prompt", { code, client });
+  setTimeout(() => {
+    if (pending && pending.code === code) {
+      pending.resolve(null);
+      pending = null;
+      broadcastToAll("bridge:pairing-cancelled");
+    }
+  }, 90_000);
+  return { code, expiresAt: Date.now() + 90_000 };
+}
+
 function sendJson(res: http.ServerResponse, status: number, body: unknown): void {
   const data = JSON.stringify(body);
   res.writeHead(status, {

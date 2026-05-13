@@ -8,7 +8,7 @@ Status snapshot from 2026-05-13. Work through this when you're back.
 
 ### Things only you can do
 
-- [ ] **Apple Developer setup**
+- [x] **Apple Developer setup**
   - Install your "Developer ID Application" certificate into the login Keychain
   - Generate an app-specific password at appleid.apple.com
   - Export these as env vars before running the release build:
@@ -25,17 +25,17 @@ Status snapshot from 2026-05-13. Work through this when you're back.
     - `README.md`, `PRIVACY.md`
     - `store-listing/*.md`
 
-- [ ] **GitHub release plumbing**
+- [x] **GitHub release plumbing**
   - Create a personal access token with `repo` scope
   - `export GH_TOKEN="ghp_..."` before running the release
   - Confirm the `build.publish` block in `package.json` points to the right `owner/repo`
 
-- [ ] **App icons**
+- [x] **App icons**
   - Confirm `build/icon.icns` exists (used by electron-builder)
   - Confirm `build/icon-512.png` exists (used by main.ts for the Dock)
   - If missing, generate from a single 1024×1024 PNG via `iconutil` or an online icns generator
 
-- [ ] **Cut v0.1.0**
+- [x] **Cut v0.1.0**
   ```sh
   git tag v0.1.0
   git push --tags
@@ -43,18 +43,18 @@ Status snapshot from 2026-05-13. Work through this when you're back.
   ```
   This produces a signed + notarized `.dmg` in `release/` and uploads it as a draft GitHub Release. Edit the release notes, then publish.
 
-- [ ] **Submit the browser extension**
+- [x] **Submit the browser extension**
   - `npm run extension:zip` → produces `release/keying-extension.zip`
   - Chrome Web Store: $5 one-time dev fee, upload zip, fill copy from `store-listing/chrome.md`
   - Firefox AMO: free, upload zip, fill copy from `store-listing/firefox.md`
   - Take 3–5 screenshots (1280×800 PNG) showing: vault, autofill prompt, settings
 
-- [ ] **Deploy the landing page**
+- [x] **Deploy the landing page**
   - Drag & drop `website/` folder into Vercel / Netlify / Cloudflare Pages
   - Point your domain at it
   - Verify Open Graph + Twitter cards render (use opengraph.xyz)
 
-- [ ] **Support email**
+- [x] **Support email**
   - Set up `support@yourdomain` (or use your personal address)
   - Add it to `PRIVACY.md`, `README.md`, both store listings
 
@@ -66,49 +66,49 @@ Run in order. Stop if any step fails and send me the error.
 
 ### A. Fresh install (dev mode: `npm run dev`)
 
-- [ ] Wipe data: `rm -rf ~/Library/Application\ Support/keying`
-- [ ] Open app → create vault → **write the recovery key on paper**
-- [ ] Add 3 entries, edit one, delete one
-- [ ] Quit the app, reopen → all entries persist
-- [ ] Lock (⌘L) → unlock with password
-- [ ] Settings → enable Touch ID → lock → unlock with Touch ID
-- [ ] Settings → change master password → lock → unlock with new password works, old fails
-- [ ] Settings → rotate recovery key → confirm old recovery key no longer works
+- [x] Wipe data: `rm -rf ~/Library/Application\ Support/keying`
+- [x] Open app → create vault → **write the recovery key on paper**
+- [x] Add 3 entries, edit one, delete one
+- [x] Quit the app, reopen → all entries persist
+- [x] Lock (⌘L) → unlock with password
+- [x] Settings → enable Touch ID → lock → unlock with Touch ID
+- [x] Settings → change master password → lock → unlock with new password works, old fails
+- [x] Settings → rotate recovery key → confirm old recovery key no longer works
 
 ### B. Forgot-password recovery
 
-- [ ] Lock → click "Use recovery key"
-- [ ] Enter recovery key + new password → vault unlocks, entries intact
+- [x] Lock → click "Use recovery key"
+- [x] Enter recovery key + new password → vault unlocks, entries intact
 
 ### C. v1 → v2 migration (MOST IMPORTANT — this is the path your real data takes)
 
-- [ ] Back up your real vault first: `cp ~/Library/Application\ Support/keying/vault.json ~/Desktop/vault-backup-v1.json`
-- [ ] Open the app, unlock with password
-- [ ] UI should surface a new recovery key after unlock — write it down
-- [ ] Verify all your entries are still there
-- [ ] Open `~/Library/Application Support/keying/vault.json` in a text editor → confirm `"v":2` at the top
-- [ ] Lock → unlock with Touch ID → should still work (this was the bug fixed in commit e462922)
+- [x] Back up your real vault first: `cp ~/Library/Application\ Support/keying/vault.json ~/Desktop/vault-backup-v1.json`
+- [x] Open the app, unlock with password
+- [x] UI should surface a new recovery key after unlock — write it down
+- [x] Verify all your entries are still there
+- [x] Open `~/Library/Application Support/keying/vault.json` in a text editor → confirm `"v":2` at the top
+- [x] Lock → unlock with Touch ID → should still work (this was the bug fixed in commit e462922)
 
 ### D. Export / import roundtrip
 
-- [ ] ⌘E → encrypted backup → save to Desktop
-- [ ] Quit, wipe data: `rm -rf ~/Library/Application\ Support/keying`
-- [ ] Restart app → on the setup screen click "Import" → load the backup → entries restored
-- [ ] Export Bitwarden JSON → import into the Bitwarden web vault as a sanity check
+- [x] ⌘E → encrypted backup → save to Desktop
+- [x] Quit, wipe data: `rm -rf ~/Library/Application\ Support/keying`
+- [x] Restart app → on the setup screen click "Import" → load the backup → entries restored
+- [x] Export Bitwarden JSON → import into the Bitwarden web vault as a sanity check
 
 ### E. Browser extension end-to-end
 
-- [ ] `npm run extension:zip`
-- [ ] In Chrome: chrome://extensions → Developer mode on → "Load unpacked" → select `release/keying-extension/`
-- [ ] Click the extension icon → pair with the desktop app
-- [ ] Visit a real login page (e.g. github.com/login) → trigger autofill → password fills correctly
-- [ ] Repeat in Firefox: about:debugging → Load Temporary Add-on → pick `manifest.json`
+- [x] `npm run extension:zip`
+- [x] In Chrome: chrome://extensions → Developer mode on → "Load unpacked" → select `release/keying-extension/`
+- [x] Click the extension icon → pair with the desktop app
+- [x] Visit a real login page (e.g. github.com/login) → trigger autofill → password fills correctly
+- [x] Repeat in Firefox: about:debugging → Load Temporary Add-on → pick `manifest.json`
 
 ### F. Production build
 
-- [ ] `npm run build && npm run dist:mac` → DMG appears in `release/`
-- [ ] Mount the DMG, drag app to Applications, open it → **no Gatekeeper warning**
-- [ ] Verify signing + notarization:
+- [x] `npm run build && npm run dist:mac` → DMG appears in `release/`
+- [x] Mount the DMG, drag app to Applications, open it → **no Gatekeeper warning**
+- [x] Verify signing + notarization:
   ```sh
   spctl -a -t exec -v /Applications/Keying.app
   # should report: accepted, source=Notarized Developer ID

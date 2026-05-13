@@ -471,6 +471,7 @@ function FactoryResetModal({ onClose }: { onClose: () => void }) {
 function BrowsersSection() {
   const [clients, setClients] = useState<PairedClient[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pairingCode, setPairingCode] = useState<string | null>(null);
 
   async function refresh() {
     setLoading(true);
@@ -481,7 +482,25 @@ function BrowsersSection() {
 
   useEffect(() => {
     refresh();
+    const offDone = window.vault.onPairingCompleted(() => {
+      setPairingCode(null);
+      refresh();
+    });
+    const offCancel = window.vault.onPairingCancelled(() => {
+      setPairingCode(null);
+    });
+    return () => {
+      offDone();
+      offCancel();
+    };
   }, []);
+
+  async function startPairing() {
+    const { code } = await window.vault.startPairingFromApp();
+    setPairingCode(code);
+    // Auto-clear from UI after 95s (matches the bridge's 90s expiry + grace)
+    setTimeout(() => setPairingCode((c) => (c === code ? null : c)), 95_000);
+  }
 
   async function revokeAll() {
     if (
@@ -495,41 +514,84 @@ function BrowsersSection() {
   }
 
   return (
-    <Card
-      title="Paired browsers"
-      description="Browsers that have a token for the local bridge on 127.0.0.1:17321. The bridge only listens on loopback — these can't be accessed from another machine."
-    >
-      {loading ? (
-        <div className="text-sm text-ink-500">Loading…</div>
-      ) : clients.length === 0 ? (
-        <div className="text-sm text-ink-400 py-4 text-center">
-          No browsers paired yet. Install the Keying extension and use its "Pair with app" button.
-        </div>
-      ) : (
-        <>
-          <ul className="divide-y divide-ink-800/60">
-            {clients.map((c, i) => (
-              <li key={i} className="py-2.5 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-sm text-ink-100 truncate">{c.client}</div>
-                  <div className="text-xs text-ink-500">
-                    Paired {formatRelative(c.createdAt)} · last used {formatRelative(c.lastUsed)}
-                  </div>
+    <>
+      <Card
+        title="Pair a new browser"
+        description="If the extension's pair button doesn't show the code, start pairing from here instead. Then enter the code below into the extension's pair screen."
+      >
+        {pairingCode ? (
+          <div className="space-y-3">
+            <div className="flex gap-1.5">
+              {pairingCode.split("").map((digit, i) => (
+                <div
+                  key={i}
+                  className="flex-1 aspect-[3/4] flex items-center justify-center bg-ink-950 border border-accent-500/40 rounded-lg font-mono text-2xl font-semibold text-accent-300"
+                >
+                  {digit}
                 </div>
-              </li>
-            ))}
-          </ul>
-          <div className="flex justify-end pt-2">
-            <button
-              onClick={revokeAll}
-              className="no-drag border border-red-900/70 hover:bg-red-950/30 text-red-300 text-sm rounded-md px-3.5 py-1.5 transition"
-            >
-              Revoke all
-            </button>
+              ))}
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-ink-500 leading-relaxed">
+                Code expires in 90 seconds. Enter it in the Keying extension popup.
+              </p>
+              <button
+                onClick={() => {
+                  window.vault.cancelPairing();
+                  setPairingCode(null);
+                }}
+                className="no-drag text-xs text-ink-400 hover:text-ink-200 transition"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
-        </>
-      )}
-    </Card>
+        ) : (
+          <button
+            onClick={startPairing}
+            className="no-drag bg-accent-500 hover:bg-accent-400 text-ink-950 text-sm font-medium rounded-md px-4 py-2 transition"
+          >
+            Generate pairing code
+          </button>
+        )}
+      </Card>
+
+      <Card
+        title="Paired browsers"
+        description="Browsers that have a token for the local bridge on 127.0.0.1:17321. The bridge only listens on loopback — these can't be accessed from another machine."
+      >
+        {loading ? (
+          <div className="text-sm text-ink-500">Loading…</div>
+        ) : clients.length === 0 ? (
+          <div className="text-sm text-ink-400 py-4 text-center">
+            No browsers paired yet.
+          </div>
+        ) : (
+          <>
+            <ul className="divide-y divide-ink-800/60">
+              {clients.map((c, i) => (
+                <li key={i} className="py-2.5 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-sm text-ink-100 truncate">{c.client}</div>
+                    <div className="text-xs text-ink-500">
+                      Paired {formatRelative(c.createdAt)} · last used {formatRelative(c.lastUsed)}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={revokeAll}
+                className="no-drag border border-red-900/70 hover:bg-red-950/30 text-red-300 text-sm rounded-md px-3.5 py-1.5 transition"
+              >
+                Revoke all
+              </button>
+            </div>
+          </>
+        )}
+      </Card>
+    </>
   );
 }
 
