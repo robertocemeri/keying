@@ -344,7 +344,14 @@ async function persist(): Promise<void> {
   const { dek, data } = ensureUnlocked();
   const file = await readVaultFile();
   if (file.v === 1) {
-    throw new Error("Internal: expected v2 vault for persist");
+    // Legacy v1 vault still on disk — happens when the user unlocked via
+    // Touch ID (which uses the stored key directly without going through the
+    // password-derived migration path). Keep writing as v1 so saves work;
+    // the vault will migrate to v2 on the next password unlock.
+    const salt = Buffer.from(file.saltB64, "base64");
+    const blob = encryptWithKey(dek, JSON.stringify(data), salt);
+    await writeVaultFile({ v: 1, saltB64: file.saltB64, blob });
+    return;
   }
   const blob = encryptWithKey(dek, JSON.stringify(data), generateSalt());
   await writeVaultFile({

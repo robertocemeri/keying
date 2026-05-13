@@ -284,15 +284,21 @@ ipcMain.handle(
   "vault:unlockPassword",
   async (_e, masterPassword: string, enableTouchID: boolean) => {
     await unlockWithPassword(masterPassword);
+    const recoveryKey = takePendingRecoveryKey();
     if (enableTouchID && isTouchIDAvailable()) {
       const ok = await promptTouchID("save the encryption key for quick unlock");
       if (ok) {
         const keyB64 = getCachedKeyB64();
         if (keyB64) await storeKey(keyB64);
       }
+    } else if (recoveryKey && (await hasStoredKey())) {
+      // V1→V2 migration just minted a new DEK. The Touch ID keychain still
+      // holds the old v1 key, which won't decrypt the new v2 file. Refresh
+      // the stored key silently so the next Touch ID unlock keeps working.
+      const keyB64 = getCachedKeyB64();
+      if (keyB64) await storeKey(keyB64);
     }
     resetAutoLockTimer();
-    const recoveryKey = takePendingRecoveryKey();
     return { ok: true, recoveryKey };
   }
 );
