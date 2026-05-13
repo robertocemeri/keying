@@ -487,7 +487,9 @@
   // --- "Save new login" detection ---
 
   const PENDING_KEY = "pending:" + HOST;
-  const PENDING_TTL_MS = 60_000;
+  // 10 minutes — long enough to cover 2FA flows where the user steps away
+  // to fetch a code from their phone.
+  const PENDING_TTL_MS = 10 * 60_000;
 
   function findUsernameFieldNear(pwField) {
     if (!pwField) return null;
@@ -592,10 +594,14 @@
       await chrome.storage.session.remove(PENDING_KEY);
       return;
     }
-    // If there's still an empty password field on this page, we're likely
-    // back on the login form (failed login). Don't prompt yet.
-    const pwOnPage = document.querySelector("input[type=password]");
-    if (pwOnPage instanceof HTMLInputElement && !pwOnPage.value) return;
+    // If there's still a VISIBLE, empty password field on this page, we're
+    // likely back on the login form (failed login) or on a 2FA page that
+    // re-shows the password field. Don't prompt yet. Hidden password
+    // fields (used by sites for cross-page state) don't count.
+    const visibleEmptyPw = Array.from(
+      document.querySelectorAll("input[type=password]")
+    ).some((el) => el.offsetParent !== null && !el.disabled && !el.value);
+    if (visibleEmptyPw) return;
 
     // Skip if the vault already has a matching entry (same username on this host)
     try {
@@ -702,4 +708,34 @@
 
   // Run after a short delay so SPAs have time to render the post-login state.
   setTimeout(checkPendingSave, 800);
+
+  // Re-check on SPA navigations. Facebook, Google, etc. don't trigger a
+  // full page load after sign-in / 2FA — they push history state. Listen
+  // for that and also re-check on visibility regain (user returned to tab
+  // after fetching a 2FA code on their phone).
+  let lastUrl = location.href;
+  const checkUrlChange = () => {
+    if (location.href === lastUrl) return;
+    lastUrl = location.href;
+    setTimeout(checkPendingSave, 800);
+  };
+  window.addEventListener("popstate", checkUrlChange);
+  // pushState / replaceState don't fire events; monkey-patch them.
+  const _push = history.pushState;
+  history.pushState = function () {
+    const r = _push.apply(this, arguments);
+    setTimeout(checkUrlChange, 0);
+    return r;
+  };
+  const _replace = history.replaceState;
+  history.replaceState = function () {
+    const r = _replace.apply(this, arguments);
+    setTimeout(checkUrlChange, 0);
+    return r;
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      setTimeout(checkPendingSave, 400);
+    }
+  });
 })();
