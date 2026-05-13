@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import RecoveryKeyDisplay from "./RecoveryKeyDisplay";
 
 type Mode = "password" | "recovery";
@@ -25,19 +25,8 @@ export default function UnlockScreen({
   const [newPw, setNewPw] = useState("");
   const [newPwConfirm, setNewPwConfirm] = useState("");
 
-  // StrictMode runs effects twice in dev, which would spawn two
-  // Touch ID prompts. macOS only allows one LAContext at a time, so the
-  // first prompt is cancelled by the second and the user sees a spurious
-  // "Touch ID was cancelled" error. Guard so it only fires once.
-  const touchIDTried = useRef(false);
-
   useEffect(() => {
     window.vault.hasRecoveryKey().then(setRecoveryAvailable);
-    if (touchIDAvailable && hasTouchIDKey && !touchIDTried.current) {
-      touchIDTried.current = true;
-      tryTouchID();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function tryTouchID() {
