@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Keyring — a local, encrypted password manager for macOS",
   "main": "dist-electron/main.js",
-  "homepage": "https://github.com/robertocemeri/keyring",
+  "homepage": "https://github.com/robertocemeri/keying",
   "author": {
     "name": "Roberto Cemeri",
     "email": "robertocemeri29@gmail.com"
@@ -68,7 +68,7 @@
     "publish": {
       "provider": "github",
       "owner": "robertocemeri",
-      "repo": "keyring",
+      "repo": "keying",
       "releaseType": "release"
     }
   },

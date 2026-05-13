@@ -117,9 +117,9 @@
         <a href="/#security">Security</a>
         <a href="/#how">How it works</a>
         <a href="/#faq">FAQ</a>
-        <a href="https://github.com/robertocemeri/keyring">Source</a>
+        <a href="https://github.com/robertocemeri/keying">Source</a>
       </nav>
-      <a class="nav__cta" href="https://github.com/robertocemeri/keyring/releases">Download for macOS</a>
+      <a class="nav__cta" href="https://github.com/robertocemeri/keying/releases">Download for macOS</a>
     </div>
   </header>
 
@@ -148,7 +148,7 @@
     <h2>What network access Keyring needs</h2>
     <p>Keyring makes network requests in only two situations:</p>
     <h3>1. Auto-update check.</h3>
-    <p>On startup the app contacts <code>api.github.com</code> and <code>objects.githubusercontent.com</code> to check whether a newer release is available on the public GitHub repository <code>robertocemeri/keyring</code>. No identifying information is sent beyond what GitHub records for any public HTTP request (IP address, User-Agent). You can disable updates by blocking outbound traffic to those hosts.</p>
+    <p>On startup the app contacts <code>api.github.com</code> and <code>objects.githubusercontent.com</code> to check whether a newer release is available on the public GitHub repository <code>robertocemeri/keying</code>. No identifying information is sent beyond what GitHub records for any public HTTP request (IP address, User-Agent). You can disable updates by blocking outbound traffic to those hosts.</p>
     <h3>2. Browser extension bridge.</h3>
     <p>Keyring runs a local HTTP server on <code>127.0.0.1:17321</code> (your computer's own loopback interface) so the Keyring browser extension can request credentials. This server is bound to <code>127.0.0.1</code> only — nothing outside your machine can reach it, and every request requires a per-browser token paired interactively.</p>
 
@@ -165,7 +165,7 @@
     <p>If this policy ever changes substantively, the change will be committed to the public repository and called out in the release notes. There is no email list to be on.</p>
 
     <h2>Contact</h2>
-    <p>Open an issue at <a href="https://github.com/robertocemeri/keyring/issues">github.com/robertocemeri/keyring/issues</a>.</p>
+    <p>Open an issue at <a href="https://github.com/robertocemeri/keying/issues">github.com/robertocemeri/keying/issues</a>.</p>
 
     <a href="/" class="back">← Back to Keyring</a>
   </main>

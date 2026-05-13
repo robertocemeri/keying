@@ -3,7 +3,7 @@
 A local, encrypted password manager for macOS. No cloud. No account. No telemetry. Your vault lives on your Mac in a single encrypted file and never leaves.
 
 <p>
-  <a href="https://github.com/robertocemeri/keyring/releases">Download</a> ·
+  <a href="https://github.com/robertocemeri/keying/releases">Download</a> ·
   <a href="./PRIVACY.md">Privacy</a> ·
   <a href="./LICENSE">License</a>
 </p>
@@ -31,7 +31,7 @@ Keyring is a 100% local password manager with a small, auditable codebase and a 
 
 ## Install
 
-Download the latest signed DMG from the [Releases page](https://github.com/robertocemeri/keyring/releases). Open it, drag Keyring to Applications, launch.
+Download the latest signed DMG from the [Releases page](https://github.com/robertocemeri/keying/releases). Open it, drag Keyring to Applications, launch.
 
 Install the browser extension from the Chrome Web Store (link will be added once approved) or Firefox Add-ons (ditto), or load `extension/` unpacked while developing.
 

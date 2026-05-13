@@ -54,7 +54,7 @@
     "description": "An open-source, local-first password manager for macOS. AES-256-GCM encrypted vault, no cloud, no account.",
     "url": "https://keyring.app/",
     "image": "https://keyring.app/og.svg",
-    "downloadUrl": "https://github.com/robertocemeri/keyring/releases",
+    "downloadUrl": "https://github.com/robertocemeri/keying/releases",
     "softwareVersion": "0.1.0",
     "author": {
       "@type": "Person",
@@ -114,9 +114,9 @@
         <a href="#security">Security</a>
         <a href="#how">How it works</a>
         <a href="#faq">FAQ</a>
-        <a href="https://github.com/robertocemeri/keyring">Source</a>
+        <a href="https://github.com/robertocemeri/keying">Source</a>
       </nav>
-      <a class="nav__cta" href="https://github.com/robertocemeri/keyring/releases">Download for macOS</a>
+      <a class="nav__cta" href="https://github.com/robertocemeri/keying/releases">Download for macOS</a>
     </div>
   </header>
 
@@ -145,11 +145,11 @@
           </p>
 
           <div class="hero__actions">
-            <a class="btn btn--primary" href="https://github.com/robertocemeri/keyring/releases">
+            <a class="btn btn--primary" href="https://github.com/robertocemeri/keying/releases">
               <span aria-hidden="true">↓</span>
               Download for macOS
             </a>
-            <a class="btn" href="https://github.com/robertocemeri/keyring">
+            <a class="btn" href="https://github.com/robertocemeri/keying">
               Read the source
               <span class="kbd" aria-hidden="true">↗</span>
             </a>
@@ -303,7 +303,7 @@
             Every security product needs an honest threat model. Marketing copy that says "military-grade" is meaningless. Here's what Keyring guarantees and where it stops.
           </p>
           <p class="mono dim" style="margin-top:24px; font-size:13px;">
-            See <a href="https://github.com/robertocemeri/keyring/blob/main/electron/crypto.ts" style="color:var(--lime); text-decoration:underline; text-decoration-color: rgba(163,230,53,0.3);">crypto.ts</a> for the primitives.
+            See <a href="https://github.com/robertocemeri/keying/blob/main/electron/crypto.ts" style="color:var(--lime); text-decoration:underline; text-decoration-color: rgba(163,230,53,0.3);">crypto.ts</a> for the primitives.
           </p>
         </div>
 
@@ -361,7 +361,7 @@
       <div class="code-card">
         <div class="code-card__head">
           <span>electron/crypto.ts · primitives</span>
-          <a href="https://github.com/robertocemeri/keyring/blob/main/electron/crypto.ts">View on GitHub ↗</a>
+          <a href="https://github.com/robertocemeri/keying/blob/main/electron/crypto.ts">View on GitHub ↗</a>
         </div>
 <pre><span class="k">import</span> { <span class="t">randomBytes, pbkdf2Sync, createCipheriv</span> } <span class="k">from</span> <span class="s">"crypto"</span>;
 
@@ -439,7 +439,7 @@
         <details class="faq__item">
           <summary>Can I audit the code?<span class="faq__plus" aria-hidden="true">+</span></summary>
           <div class="faq__body">
-            Please do. The full source is at <a href="https://github.com/robertocemeri/keyring" style="text-decoration: underline; text-decoration-color: rgba(163,230,53,0.3);">github.com/robertocemeri/keyring</a>. The crypto layer is one file (<code>electron/crypto.ts</code>), the vault format is documented in <code>electron/vault.ts</code>, and the local bridge protocol is in <code>electron/bridge.ts</code>. Around 4,000 lines of TypeScript total.
+            Please do. The full source is at <a href="https://github.com/robertocemeri/keying" style="text-decoration: underline; text-decoration-color: rgba(163,230,53,0.3);">github.com/robertocemeri/keying</a>. The crypto layer is one file (<code>electron/crypto.ts</code>), the vault format is documented in <code>electron/vault.ts</code>, and the local bridge protocol is in <code>electron/bridge.ts</code>. Around 4,000 lines of TypeScript total.
           </div>
         </details>
       </div>
@@ -452,7 +452,7 @@
         <h2 class="h-display" style="margin: 22px 0 0;">
           Take your <em>passwords</em><br/>back home.
         </h2>
-        <a class="btn btn--primary" href="https://github.com/robertocemeri/keyring/releases">
+        <a class="btn btn--primary" href="https://github.com/robertocemeri/keying/releases">
           <span aria-hidden="true">↓</span> Download Keyring for macOS
         </a>
         <div class="cta__hint">Free · open source · MIT licensed · v0.1.0 · macOS 12+ · Apple Silicon &amp; Intel</div>
@@ -475,23 +475,23 @@
           <li><a href="#features">Features</a></li>
           <li><a href="#security">Security</a></li>
           <li><a href="#how">How it works</a></li>
-          <li><a href="https://github.com/robertocemeri/keyring/releases">Download</a></li>
+          <li><a href="https://github.com/robertocemeri/keying/releases">Download</a></li>
         </ul>
       </div>
       <div class="footer__col">
         <h4>Open source</h4>
         <ul>
-          <li><a href="https://github.com/robertocemeri/keyring">Source code</a></li>
-          <li><a href="https://github.com/robertocemeri/keyring/issues">Issues</a></li>
-          <li><a href="https://github.com/robertocemeri/keyring/blob/main/LICENSE">License (MIT)</a></li>
+          <li><a href="https://github.com/robertocemeri/keying">Source code</a></li>
+          <li><a href="https://github.com/robertocemeri/keying/issues">Issues</a></li>
+          <li><a href="https://github.com/robertocemeri/keying/blob/main/LICENSE">License (MIT)</a></li>
         </ul>
       </div>
       <div class="footer__col">
         <h4>Trust</h4>
         <ul>
           <li><a href="/privacy.html">Privacy policy</a></li>
-          <li><a href="https://github.com/robertocemeri/keyring/blob/main/electron/crypto.ts">Crypto primitives</a></li>
-          <li><a href="https://github.com/robertocemeri/keyring/blob/main/STRATEGY.md">Roadmap</a></li>
+          <li><a href="https://github.com/robertocemeri/keying/blob/main/electron/crypto.ts">Crypto primitives</a></li>
+          <li><a href="https://github.com/robertocemeri/keying/blob/main/STRATEGY.md">Roadmap</a></li>
         </ul>
       </div>
     </div>

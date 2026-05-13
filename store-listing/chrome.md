@@ -10,7 +10,7 @@ Keyring is a local-first password manager. Your vault lives on your Mac in an en
 
 **How it works**
 
-1. Install the Keyring app for macOS (free at https://github.com/robertocemeri/keyring/releases).
+1. Install the Keyring app for macOS (free at https://github.com/robertocemeri/keying/releases).
 2. Pair this extension with the app via a 6-digit code shown in the app.
 3. Visit any site — Keyring matches it against your vault and offers autofill, including TOTP codes.
 
@@ -28,7 +28,7 @@ Keyring is a local-first password manager. Your vault lives on your Mac in an en
 - `storage` — caches the per-browser pairing token in `chrome.storage.local`.
 - `activeTab`, `scripting` — read the form on the page you're on so we can fill it.
 
-The full source code is open at https://github.com/robertocemeri/keyring — audit it yourself.
+The full source code is open at https://github.com/robertocemeri/keying — audit it yourself.
 
 ## Category
 

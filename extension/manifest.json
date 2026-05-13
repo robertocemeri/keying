@@ -3,7 +3,7 @@
   "name": "Keyring",
   "version": "0.1.0",
   "description": "Autofill from your local Keyring vault. No cloud, no account — credentials live in the Keyring app on your Mac.",
-  "homepage_url": "https://github.com/robertocemeri/keyring",
+  "homepage_url": "https://github.com/robertocemeri/keying",
   "author": "Roberto Cemeri",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": [

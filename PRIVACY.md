@@ -27,7 +27,7 @@ The author of Keyring (and any party other than you) cannot read your data becau
 
 Keyring makes network requests in only two situations:
 
-1. **Auto-update check.** On startup the app contacts `api.github.com` and `objects.githubusercontent.com` to check whether a newer release is available on the public GitHub repository `robertocemeri/keyring`. No identifying information is sent beyond what GitHub records for any public HTTP request (IP address, User-Agent). You can disable updates by blocking outbound traffic to those hosts.
+1. **Auto-update check.** On startup the app contacts `api.github.com` and `objects.githubusercontent.com` to check whether a newer release is available on the public GitHub repository `robertocemeri/keying`. No identifying information is sent beyond what GitHub records for any public HTTP request (IP address, User-Agent). You can disable updates by blocking outbound traffic to those hosts.
 2. **Browser extension bridge.** Keyring runs a local HTTP server on `127.0.0.1:17321` (your computer's own loopback interface) so the Keyring browser extension can request credentials. This server is bound to `127.0.0.1` only — nothing outside your machine can reach it, and every request requires a per-browser token paired interactively.
 
 ## Keychain access
@@ -48,4 +48,4 @@ If this policy ever changes substantively, the change will be committed to the p
 
 ## Contact
 
-Open an issue at https://github.com/robertocemeri/keyring/issues.
+Open an issue at https://github.com/robertocemeri/keying/issues.

@@ -12,7 +12,7 @@ Pair this add-on with the Keyring app using a 6-digit code shown in the app once
 
 ## Source code
 
-https://github.com/robertocemeri/keyring
+https://github.com/robertocemeri/keying
 
 ## Privacy
 
