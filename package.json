@@ -18,7 +18,7 @@
     "electron:dev": "npm run setup:dev-icon && concurrently -k \"vite\" \"wait-on tcp:5173 && tsc -p tsconfig.electron.json && cross-env NODE_ENV=development electron .\"",
     "electron:build": "tsc -p tsconfig.electron.json && vite build && electron-builder --mac",
     "extension:zip": "node scripts/build-extension.mjs",
-    "release": "tsc -p tsconfig.electron.json && vite build && electron-builder --mac --publish always"
+    "release": "dotenv -e .env -- bash -c 'tsc -p tsconfig.electron.json && vite build && electron-builder --mac --publish always'"
   },
   "build": {
     "appId": "com.cemeri.keyring",
@@ -84,6 +84,7 @@
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.0",
     "cross-env": "^7.0.3",
+    "dotenv-cli": "^11.0.0",
     "electron": "^33.2.0",
     "electron-builder": "^25.1.8",
     "postcss": "^8.4.49",
