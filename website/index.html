@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0a0a0c" />
+
+  <title>Keyring — a local, encrypted password manager for macOS</title>
+  <meta name="description" content="Keyring is an open-source, local-first password manager for macOS. Your vault is encrypted on your device with AES-256-GCM and never leaves it. No cloud, no account, no telemetry." />
+  <link rel="canonical" href="https://keyring.app/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://keyring.app/" />
+  <meta property="og:title" content="Keyring — a local, encrypted password manager for macOS" />
+  <meta property="og:description" content="Your passwords on your Mac. Encrypted with AES-256-GCM. Open source. No cloud, no account, no telemetry." />
+  <meta property="og:image" content="https://keyring.app/og.svg" />
+  <meta property="og:image:type" content="image/svg+xml" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:site_name" content="Keyring" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Keyring — a local, encrypted password manager for macOS" />
+  <meta name="twitter:description" content="Your passwords on your Mac. Encrypted with AES-256-GCM. Open source. No cloud, no account, no telemetry." />
+  <meta name="twitter:image" content="https://keyring.app/og.svg" />
+
+  <!-- Robots / discovery -->
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+
+  <!-- Icon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <!-- Fonts: Instrument Serif (italic editorial) + Outfit (sans body) + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/styles.css" />
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Keyring",
+    "operatingSystem": "macOS 12+",
+    "applicationCategory": "SecurityApplication",
+    "description": "An open-source, local-first password manager for macOS. AES-256-GCM encrypted vault, no cloud, no account.",
+    "url": "https://keyring.app/",
+    "image": "https://keyring.app/og.svg",
+    "downloadUrl": "https://github.com/robertocemeri/keyring/releases",
+    "softwareVersion": "0.1.0",
+    "author": {
+      "@type": "Person",
+      "name": "Roberto Cemeri"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "license": "https://opensource.org/licenses/MIT",
+    "softwareRequirements": "macOS 12 or later",
+    "featureList": [
+      "AES-256-GCM encrypted vault",
+      "PBKDF2-SHA256 600,000 iterations",
+      "Touch ID quick-unlock",
+      "Local TOTP code generation",
+      "Browser autofill via paired extension",
+      "Recovery key for forgotten master passwords",
+      "Import from Bitwarden, 1Password, iCloud Keychain",
+      "Export as encrypted backup, Bitwarden JSON, or CSV"
+    ]
+  }
+  </script>
+</head>
+
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Ticker -->
+  <div class="ticker" role="presentation" aria-hidden="true">
+    <div class="ticker__track">
+      <span>vault.enc encrypted with aes-256-gcm</span>
+      <span>key derived via pbkdf2-sha256 · 600,000 iterations</span>
+      <span>master password never leaves your mac</span>
+      <span>open source · mit · audit it yourself</span>
+      <span>no cloud · no account · no telemetry</span>
+      <span>vault.enc encrypted with aes-256-gcm</span>
+      <span>key derived via pbkdf2-sha256 · 600,000 iterations</span>
+      <span>master password never leaves your mac</span>
+      <span>open source · mit · audit it yourself</span>
+      <span>no cloud · no account · no telemetry</span>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <header class="nav">
+    <div class="nav__inner">
+      <a href="/" class="brand" aria-label="Keyring home">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <span>Keyring</span>
+      </a>
+      <nav class="nav__links" aria-label="Primary">
+        <a href="#features">Features</a>
+        <a href="#security">Security</a>
+        <a href="#how">How it works</a>
+        <a href="#faq">FAQ</a>
+        <a href="https://github.com/robertocemeri/keyring">Source</a>
+      </nav>
+      <a class="nav__cta" href="https://github.com/robertocemeri/keyring/releases">Download for macOS</a>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- HERO -->
+    <section class="section hero">
+      <div class="hero__pre">
+        <span class="dot" aria-hidden="true"></span>
+        <span>v0.1.0 · macOS · Apple Silicon &amp; Intel</span>
+      </div>
+
+      <div class="hero__grid">
+        <div>
+          <h1 class="hero__title">
+            Your passwords,<br />
+            <em>where they belong</em> —<br />
+            <span class="stroke">on your Mac.</span>
+          </h1>
+
+          <p class="hero__sub">
+            Keyring is an open-source password manager that lives entirely on your device.
+            One encrypted file. AES-256-GCM. Your master password derives the key — and
+            never leaves the machine it was typed on. There is no Keyring server because
+            there is nothing for one to do.
+          </p>
+
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="https://github.com/robertocemeri/keyring/releases">
+              <span aria-hidden="true">↓</span>
+              Download for macOS
+            </a>
+            <a class="btn" href="https://github.com/robertocemeri/keyring">
+              Read the source
+              <span class="kbd" aria-hidden="true">↗</span>
+            </a>
+          </div>
+
+          <ul class="hero__meta">
+            <li><b>Free.</b> Forever. No trial.</li>
+            <li><b>Open source.</b> MIT.</li>
+            <li><b>Notarized.</b> By Apple.</li>
+          </ul>
+        </div>
+
+        <aside class="hero__panel" aria-label="Sample terminal output">
+          <div class="terminal">
+            <div class="terminal__bar">
+              <span class="dots"><span></span><span></span><span></span></span>
+              <span class="title">~/Library/Application Support/Keyring</span>
+            </div>
+            <div class="terminal__body">
+              <div class="terminal__line"><span class="term__prompt">$</span> <span class="term__cmd">file vault.enc</span></div>
+              <div class="terminal__line term__out">vault.enc: JSON, encrypted</div>
+              <div class="terminal__line"><span class="term__prompt">$</span> <span class="term__cmd">jq .v vault.enc</span></div>
+              <div class="terminal__line term__out">2</div>
+              <div class="terminal__line"><span class="term__prompt">$</span> <span class="term__cmd">jq '.pw, .rec | keys' vault.enc</span></div>
+              <div class="terminal__line term__out">["saltB64","wrapped"]<br/>["saltB64","wrapped"]</div>
+              <div class="terminal__line"><span class="term__prompt">$</span> <span class="term__cmd">openssl aes-256-gcm -d -in vault.enc</span><span class="term__cursor"></span></div>
+              <div class="terminal__line term__warn">↳ requires key derived from master password</div>
+              <div class="terminal__line term__ok">↳ key is not on this machine without you</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- MANIFESTO -->
+    <section class="manifesto">
+      <div class="manifesto__inner">
+        <h2 class="manifesto__quote">
+          The cloud is <em>someone else's computer.</em> Your passwords don't belong there.
+        </h2>
+        <div class="manifesto__body">
+          <p>
+            Every other password manager makes you trust a server you can't see, run by people you'll never meet, paid for by a subscription that resets if you stop. The whole point of a password manager is to <strong>raise the cost of stealing your data</strong> — yet the standard architecture is one breach away from leaking every credential you own.
+          </p>
+          <p>
+            Keyring takes the opposite bet. Your vault is <strong>a single encrypted file on your Mac</strong>. The key is derived from your master password using PBKDF2 with 600,000 iterations and immediately wraps a random data key. The plaintext only exists in process memory, only while the app is unlocked, only on the machine you typed the password into.
+          </p>
+          <p>
+            There is no cloud. There is no account. There is no analytics endpoint phoning home with your usage. The browser extension talks to the app on <code class="mono dim">127.0.0.1</code>. The only outbound network request the app ever makes is a release-check against GitHub — and you can block it.
+          </p>
+          <div class="manifesto__sig">— Roberto · maker of Keyring · 2026</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section features" id="features">
+      <div class="features__head">
+        <div>
+          <span class="label">What's inside</span>
+          <h2 class="h-2" style="margin-top:18px">Small surface. Sharp tools.</h2>
+        </div>
+        <p>
+          Every feature pulls its weight. No "Keyring Cloud Premium." No nags. No analytics. Just the things a password manager actually has to do, executed with care.
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature feature--lg feature--accent">
+          <div class="feature__num"><span class="lime">01</span> · ENCRYPTION</div>
+          <div>
+            <h3 class="feature__title">AES-256-GCM, <em>locally derived.</em></h3>
+            <p class="feature__desc">Your master password runs through PBKDF2-SHA256 with 600,000 iterations to derive a key. That key wraps a random data key, which encrypts the vault file. The data key is invisible to anyone — including the app's author. Brute-force is computationally absurd on consumer hardware.</p>
+          </div>
+        </article>
+
+        <article class="feature feature--sm">
+          <div class="feature__num"><span class="lime">02</span> · TOUCH&nbsp;ID</div>
+          <div>
+            <h3 class="feature__title">Quick unlock by fingerprint.</h3>
+            <p class="feature__desc">The encryption key is held in macOS Keychain, gated by your fingerprint. Faster than typing — same security boundary.</p>
+          </div>
+        </article>
+
+        <article class="feature feature--md">
+          <div class="feature__num"><span class="lime">03</span> · TOTP</div>
+          <div>
+            <h3 class="feature__title">Built-in 2FA codes.</h3>
+            <p class="feature__desc">Every entry can hold a TOTP secret. Keyring generates the 6-digit code locally and copies it on click — no separate authenticator app, no QR ritual.</p>
+          </div>
+        </article>
+
+        <article class="feature feature--md">
+          <div class="feature__num"><span class="lime">04</span> · BROWSER&nbsp;AUTOFILL</div>
+          <div>
+            <h3 class="feature__title">Paired, on loopback.</h3>
+            <p class="feature__desc">A small extension for Chrome, Edge, Brave, Arc, and Firefox talks to the app over <span class="mono dim">127.0.0.1:17321</span> — and only with a per-browser token you confirm with a 6-digit code.</p>
+          </div>
+        </article>
+
+        <article class="feature feature--tall">
+          <div class="feature__num"><span class="lime">05</span> · RECOVERY</div>
+          <div>
+            <h3 class="feature__title">A key you can print.</h3>
+            <p class="feature__desc">During setup Keyring generates a recovery key and asks you to print it. If you forget your master password, the recovery key resets it. Lose both, and the data is unrecoverable — by design.</p>
+          </div>
+        </article>
+
+        <article class="feature feature--wide">
+          <div class="feature__num"><span class="lime">06</span> · PORTABILITY</div>
+          <div>
+            <h3 class="feature__title">Import from anywhere. Export anytime.</h3>
+            <p class="feature__desc">Bitwarden JSON or CSV, 1Password CSV, iCloud Keychain CSV, generic browser exports. Round-trip your data back out as encrypted backup, Bitwarden JSON, or CSV. Your data doesn't get held hostage.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section how" id="how">
+      <div class="how__head">
+        <span class="label">How it works</span>
+        <h2 class="h-2">Three steps. No accounts.</h2>
+      </div>
+      <ol class="how__steps">
+        <li class="how__step">
+          <div class="how__num">01</div>
+          <h3>Download &amp; set a master password</h3>
+          <p>The DMG is signed and notarized. On first launch you pick a master password and Keyring prints a recovery key.</p>
+        </li>
+        <li class="how__step">
+          <div class="how__num">02</div>
+          <h3>Pair your browser</h3>
+          <p>Install the extension. A 6-digit code in the app + extension confirms the pairing. After that, autofill works on every site.</p>
+        </li>
+        <li class="how__step">
+          <div class="how__num">03</div>
+          <h3>Forget the cloud</h3>
+          <p>Use Keyring. Back up the vault file when you want — same master password unlocks it on any Mac.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- SECURITY -->
+    <section class="section security" id="security">
+      <div class="security__grid">
+        <div class="security__copy">
+          <span class="label">The honest threat model</span>
+          <h2 class="h-2">What Keyring protects.<br/>And what it doesn't.</h2>
+          <p>
+            Every security product needs an honest threat model. Marketing copy that says "military-grade" is meaningless. Here's what Keyring guarantees and where it stops.
+          </p>
+          <p class="mono dim" style="margin-top:24px; font-size:13px;">
+            See <a href="https://github.com/robertocemeri/keyring/blob/main/electron/crypto.ts" style="color:var(--lime); text-decoration:underline; text-decoration-color: rgba(163,230,53,0.3);">crypto.ts</a> for the primitives.
+          </p>
+        </div>
+
+        <div class="props">
+          <div class="prop prop--yes">
+            <div class="prop__head">
+              <span class="prop__sign">Protects</span>
+              <span class="prop__title">Vault-file theft</span>
+            </div>
+            <p class="prop__body">A stolen <code class="mono dim">vault.enc</code> is unreadable without your master password or recovery key. 600k PBKDF2 iterations make brute-force impractical on consumer hardware.</p>
+          </div>
+
+          <div class="prop prop--yes">
+            <div class="prop__head">
+              <span class="prop__sign">Protects</span>
+              <span class="prop__title">Network exposure</span>
+            </div>
+            <p class="prop__body">No server, no syncing, no telemetry. The only outbound request the app makes is to GitHub for release checks — and you can block it.</p>
+          </div>
+
+          <div class="prop prop--yes">
+            <div class="prop__head">
+              <span class="prop__sign">Protects</span>
+              <span class="prop__title">Browser-extension abuse</span>
+            </div>
+            <p class="prop__body">The bridge binds to loopback only. Each browser carries its own bearer token, issued only after you confirm a 6-digit code in the app.</p>
+          </div>
+
+          <div class="prop prop--no">
+            <div class="prop__head">
+              <span class="prop__sign">Does not</span>
+              <span class="prop__title">Replace macOS hygiene</span>
+            </div>
+            <p class="prop__body">Once your vault is unlocked, the encryption key sits in process memory. A compromised macOS, a kernel-level keylogger, or someone with physical access to your unlocked Mac can defeat Keyring — same as any password manager.</p>
+          </div>
+
+          <div class="prop prop--no">
+            <div class="prop__head">
+              <span class="prop__sign">Does not</span>
+              <span class="prop__title">Recover forgotten passwords</span>
+            </div>
+            <p class="prop__body">Forget both your master password <em>and</em> your recovery key, and the data is gone. There is no Keyring support to call — that's the price of zero-knowledge.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CODE PROOF -->
+    <section class="section proof">
+      <div class="proof__head">
+        <span class="label">Read the code</span>
+        <h2 class="h-2">It's all open. Audit any line.</h2>
+      </div>
+
+      <div class="code-card">
+        <div class="code-card__head">
+          <span>electron/crypto.ts · primitives</span>
+          <a href="https://github.com/robertocemeri/keyring/blob/main/electron/crypto.ts">View on GitHub ↗</a>
+        </div>
+<pre><span class="k">import</span> { <span class="t">randomBytes, pbkdf2Sync, createCipheriv</span> } <span class="k">from</span> <span class="s">"crypto"</span>;
+
+<span class="k">const</span> <span class="t">PBKDF2_ITERATIONS</span> = <span class="n">600_000</span>;
+<span class="k">const</span> <span class="t">PBKDF2_KEYLEN</span>     = <span class="n">32</span>;
+<span class="k">const</span> <span class="t">PBKDF2_DIGEST</span>     = <span class="s">"sha256"</span>;
+
+<span class="k">export function</span> <span class="f">deriveKey</span>(<span class="t">masterPassword</span>: <span class="t">string</span>, <span class="t">salt</span>: <span class="t">Buffer</span>): <span class="t">Buffer</span> {
+  <span class="k">return</span> <span class="f">pbkdf2Sync</span>(<span class="t">masterPassword</span>, <span class="t">salt</span>, <span class="t">PBKDF2_ITERATIONS</span>, <span class="t">PBKDF2_KEYLEN</span>, <span class="t">PBKDF2_DIGEST</span>);
+}
+
+<span class="k">export function</span> <span class="f">encryptWithKey</span>(<span class="t">key</span>: <span class="t">Buffer</span>, <span class="t">plaintext</span>: <span class="t">string</span>, <span class="t">salt</span>: <span class="t">Buffer</span>): <span class="t">EncryptedBlob</span> {
+  <span class="k">const</span> <span class="t">iv</span>     = <span class="f">randomBytes</span>(<span class="n">12</span>);
+  <span class="k">const</span> <span class="t">cipher</span> = <span class="f">createCipheriv</span>(<span class="s">"aes-256-gcm"</span>, <span class="t">key</span>, <span class="t">iv</span>);
+  <span class="k">const</span> <span class="t">ct</span>     = <span class="t">Buffer</span>.<span class="f">concat</span>([<span class="t">cipher</span>.<span class="f">update</span>(<span class="t">plaintext</span>, <span class="s">"utf8"</span>), <span class="t">cipher</span>.<span class="f">final</span>()]);
+  <span class="k">const</span> <span class="t">tag</span>    = <span class="t">cipher</span>.<span class="f">getAuthTag</span>();
+  <span class="k">return</span> { <span class="t">v</span>: <span class="n">1</span>, <span class="t">salt</span>: <span class="t">salt</span>.<span class="f">toString</span>(<span class="s">"base64"</span>), <span class="t">iv</span>: <span class="t">iv</span>.<span class="f">toString</span>(<span class="s">"base64"</span>),
+           <span class="t">tag</span>: <span class="t">tag</span>.<span class="f">toString</span>(<span class="s">"base64"</span>), <span class="t">ct</span>: <span class="t">ct</span>.<span class="f">toString</span>(<span class="s">"base64"</span>), <span class="t">iterations</span>: <span class="t">PBKDF2_ITERATIONS</span> };
+}
+<span class="c">// That's it. AES-256-GCM, 12-byte IV per encrypt, 16-byte auth tag, PBKDF2 with 600k rounds.</span>
+<span class="c">// The DEK wraps under both the password-derived key and a recovery-key-derived key.</span></pre>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section faq" id="faq">
+      <div class="faq__head">
+        <span class="label">Frequently asked</span>
+        <h2 class="h-2">Questions worth answering.</h2>
+      </div>
+
+      <div class="faq__list">
+        <details class="faq__item">
+          <summary>Is Keyring really free?<span class="faq__plus" aria-hidden="true">+</span></summary>
+          <div class="faq__body">
+            Yes, and forever. The whole project is MIT-licensed and the codebase has no paywall, trial, or "Pro" tier. If you want to support it, give the GitHub repo a star.
+          </div>
+        </details>
+
+        <details class="faq__item">
+          <summary>What happens if I forget my master password?<span class="faq__plus" aria-hidden="true">+</span></summary>
+          <div class="faq__body">
+            You use your recovery key — Keyring generated one for you at setup and asked you to print it. The recovery key resets the master password without re-encrypting your data. If you've lost both the master password <em>and</em> the recovery key, the vault is unrecoverable. There is no backdoor.
+          </div>
+        </details>
+
+        <details class="faq__item">
+          <summary>How do I back up my vault?<span class="faq__plus" aria-hidden="true">+</span></summary>
+          <div class="faq__body">
+            Settings → Backup &amp; export → Export encrypted backup. You'll get a copy of <code>vault.enc</code> that opens with the same master password on any Mac. Drop it into <code>~/Library/Application Support/Keyring/</code> to restore. For migrations to another password manager, export as Bitwarden JSON or CSV.
+          </div>
+        </details>
+
+        <details class="faq__item">
+          <summary>Does Keyring sync between my devices?<span class="faq__plus" aria-hidden="true">+</span></summary>
+          <div class="faq__body">
+            Not by itself — that would require a server, which Keyring doesn't have. If you want sync, put your <code>vault.enc</code> in iCloud Drive, Dropbox, or any folder that gets synced. Because the file is encrypted on disk, the sync service sees only ciphertext.
+          </div>
+        </details>
+
+        <details class="faq__item">
+          <summary>Why macOS only?<span class="faq__plus" aria-hidden="true">+</span></summary>
+          <div class="faq__body">
+            Keyring uses Touch ID and the macOS Keychain for the quick-unlock path. Porting to Windows/Linux is on the roadmap once macOS is fully shipped; the cross-platform pieces (vault format, crypto, browser bridge) are already platform-agnostic.
+          </div>
+        </details>
+
+        <details class="faq__item">
+          <summary>How is this different from Bitwarden?<span class="faq__plus" aria-hidden="true">+</span></summary>
+          <div class="faq__body">
+            Bitwarden has a server (you can self-host, but most people don't). Keyring has no server, ever — there's nothing for one to do. Bitwarden also has Premium tiers; Keyring is free and MIT-licensed. Both use strong encryption; the difference is architectural philosophy.
+          </div>
+        </details>
+
+        <details class="faq__item">
+          <summary>Can I audit the code?<span class="faq__plus" aria-hidden="true">+</span></summary>
+          <div class="faq__body">
+            Please do. The full source is at <a href="https://github.com/robertocemeri/keyring" style="text-decoration: underline; text-decoration-color: rgba(163,230,53,0.3);">github.com/robertocemeri/keyring</a>. The crypto layer is one file (<code>electron/crypto.ts</code>), the vault format is documented in <code>electron/vault.ts</code>, and the local bridge protocol is in <code>electron/bridge.ts</code>. Around 4,000 lines of TypeScript total.
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="cta">
+      <div class="cta__inner">
+        <span class="label">Ready when you are</span>
+        <h2 class="h-display" style="margin: 22px 0 0;">
+          Take your <em>passwords</em><br/>back home.
+        </h2>
+        <a class="btn btn--primary" href="https://github.com/robertocemeri/keyring/releases">
+          <span aria-hidden="true">↓</span> Download Keyring for macOS
+        </a>
+        <div class="cta__hint">Free · open source · MIT licensed · v0.1.0 · macOS 12+ · Apple Silicon &amp; Intel</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer__top">
+      <div class="footer__col">
+        <div class="footer__brand">
+          <span class="brand__mark" aria-hidden="true"></span>
+          <span class="mono" style="font-size:14px;">Keyring</span>
+        </div>
+        <p class="footer__tag">A password manager that respects the meaning of "your data."</p>
+      </div>
+      <div class="footer__col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#security">Security</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="https://github.com/robertocemeri/keyring/releases">Download</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Open source</h4>
+        <ul>
+          <li><a href="https://github.com/robertocemeri/keyring">Source code</a></li>
+          <li><a href="https://github.com/robertocemeri/keyring/issues">Issues</a></li>
+          <li><a href="https://github.com/robertocemeri/keyring/blob/main/LICENSE">License (MIT)</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Trust</h4>
+        <ul>
+          <li><a href="/privacy.html">Privacy policy</a></li>
+          <li><a href="https://github.com/robertocemeri/keyring/blob/main/electron/crypto.ts">Crypto primitives</a></li>
+          <li><a href="https://github.com/robertocemeri/keyring/blob/main/STRATEGY.md">Roadmap</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div>© 2026 Roberto Cemeri · Made on a Mac</div>
+      <div>v0.1.0 · macOS 12+ · MIT</div>
+    </div>
+  </footer>
+
+  <script defer src="/script.js"></script>
+</body>
+</html>

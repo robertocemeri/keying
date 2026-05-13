@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="bg" cx="0.18" cy="0.1" r="1.1">
+      <stop offset="0" stop-color="#1a1a1f"/>
+      <stop offset="0.5" stop-color="#0e0e12"/>
+      <stop offset="1" stop-color="#0a0a0c"/>
+    </radialGradient>
+    <radialGradient id="lime-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#a3e635" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#a3e635" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="mark" cx="0.3" cy="0.3" r="0.9">
+      <stop offset="0" stop-color="#c9f062"/>
+      <stop offset="0.6" stop-color="#a3e635"/>
+      <stop offset="1" stop-color="#65a30d"/>
+    </radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" fill="none" stroke="#ffffff" stroke-opacity="0.025" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <ellipse cx="120" cy="80" rx="500" ry="350" fill="url(#lime-glow)"/>
+
+  <!-- Brand mark -->
+  <g transform="translate(80, 80)">
+    <rect width="56" height="56" rx="14" fill="url(#mark)"/>
+    <path d="M16 22 H34 V16 H40 V34 H16 Z" fill="#0a0a0c"/>
+  </g>
+  <text x="158" y="118"
+    font-family="'JetBrains Mono', monospace"
+    font-size="22" fill="#ececf0" letter-spacing="0.5">Keyring</text>
+
+  <!-- Headline (italic editorial) -->
+  <text x="80" y="290"
+    font-family="'Instrument Serif', 'Georgia', serif"
+    font-style="italic" font-size="110" fill="#ececf0" letter-spacing="-2">Your passwords,</text>
+  <text x="80" y="400"
+    font-family="'Instrument Serif', 'Georgia', serif"
+    font-style="italic" font-size="110" fill="#a3e635" letter-spacing="-2">on your Mac.</text>
+
+  <!-- Subhead -->
+  <text x="80" y="470"
+    font-family="'JetBrains Mono', monospace"
+    font-size="20" fill="#8a8a98" letter-spacing="0.5">
+    Open-source · AES-256-GCM · No cloud · No account · No telemetry
+  </text>
+
+  <!-- Bottom row -->
+  <rect x="80" y="540" width="1040" height="1" fill="#26262d"/>
+  <text x="80" y="585"
+    font-family="'JetBrains Mono', monospace"
+    font-size="16" fill="#5a5a68" letter-spacing="2">
+    KEYRING.APP · MACOS 12+ · MIT
+  </text>
+  <text x="1120" y="585" text-anchor="end"
+    font-family="'JetBrains Mono', monospace"
+    font-size="16" fill="#a3e635" letter-spacing="2">
+    DOWNLOAD →
+  </text>
+
+  <!-- Decorative dots -->
+  <g fill="#a3e635" opacity="0.7">
+    <circle cx="990" cy="180" r="3"/>
+    <circle cx="1020" cy="200" r="2"/>
+    <circle cx="1050" cy="170" r="4"/>
+    <circle cx="1080" cy="220" r="2"/>
+  </g>
+</svg>
