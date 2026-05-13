@@ -105,8 +105,9 @@ export function startPairingFromApp(client: string): {
     initiator: "app",
     resolve: () => {},
   };
-  // Still broadcast in case any renderer is listening — harmless if not.
-  broadcastToAll("bridge:pairing-prompt", { code, client });
+  // Don't broadcast bridge:pairing-prompt — the Settings card is already
+  // rendering the returned code. Broadcasting would also pop the
+  // PairingOverlay modal, showing the same code in two places.
   setTimeout(() => {
     if (pending && pending.code === code) {
       pending.resolve(null);
