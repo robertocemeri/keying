@@ -1,10 +1,15 @@
-import { app, BrowserWindow, ipcMain, Menu, globalShortcut } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, globalShortcut, dialog } from "electron";
 import path from "path";
+import { promises as fs } from "fs";
 import {
   vaultExists,
   createVault,
   unlockWithPassword,
   unlockWithKey,
+  unlockWithRecoveryKey,
+  hasRecoveryKey,
+  rotateRecoveryKey,
+  takePendingRecoveryKey,
   lock,
   isUnlocked,
   listEntries,
@@ -24,6 +29,8 @@ import {
   getGlobalSettings,
   setGlobalSettings,
   bulkAddEntries,
+  readEncryptedFileBytes,
+  getVaultPath,
   Entry,
 } from "./vault";
 import {
@@ -37,6 +44,7 @@ import {
 import { generatePassword } from "./crypto";
 import { totpAt, normalizeTotpInput } from "./totp";
 import { detectAndParse, ImportedEntry } from "./import";
+import { entriesToCsv, entriesToBitwardenJson } from "./export";
 import {
   startBridge,
   stopBridge,
@@ -52,6 +60,13 @@ import {
   destroyOverlay,
   setOverlayDev,
 } from "./overlay";
+import {
+  checkOnStartup,
+  checkNow,
+  installNow,
+  getUpdateStatus,
+  getCurrentVersion,
+} from "./updater";
 
 const isDev = process.env.NODE_ENV === "development";
 const AUTO_LOCK_MS = 5 * 60 * 1000;
@@ -126,13 +141,12 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
-  // Set dock icon in dev mode (in production, electron-builder bakes it in).
   if (process.platform === "darwin" && app.dock) {
     try {
       const iconPath = path.join(__dirname, "..", "build", "icon-512.png");
       app.dock.setIcon(iconPath);
     } catch {
-      /* ignore — icon is optional in dev */
+      /* ignore */
     }
   }
 
@@ -162,12 +176,37 @@ app.whenReady().then(async () => {
           { role: "about" },
           { type: "separator" },
           {
+            label: "Settings…",
+            accelerator: "CmdOrCtrl+,",
+            click: () => {
+              if (!isUnlocked()) return;
+              mainWindow?.focus();
+              mainWindow?.webContents.send("menu:settings");
+            },
+          },
+          {
+            label: "Check for Updates…",
+            click: () => {
+              void checkNow();
+            },
+          },
+          { type: "separator" },
+          {
             label: "Import…",
             accelerator: "CmdOrCtrl+I",
             click: () => {
               if (!isUnlocked()) return;
               mainWindow?.focus();
               mainWindow?.webContents.send("menu:import");
+            },
+          },
+          {
+            label: "Export…",
+            accelerator: "CmdOrCtrl+E",
+            click: () => {
+              if (!isUnlocked()) return;
+              mainWindow?.focus();
+              mainWindow?.webContents.send("menu:export");
             },
           },
           { type: "separator" },
@@ -197,6 +236,8 @@ app.whenReady().then(async () => {
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+
+  void checkOnStartup();
 });
 
 app.on("window-all-closed", () => {
@@ -226,7 +267,7 @@ ipcMain.handle(
     if (!masterPassword || masterPassword.length < 8) {
       throw new Error("Master password must be at least 8 characters");
     }
-    await createVault(masterPassword);
+    const { recoveryKey } = await createVault(masterPassword);
     if (enableTouchID && isTouchIDAvailable()) {
       const ok = await promptTouchID("save the encryption key for quick unlock");
       if (ok) {
@@ -235,7 +276,7 @@ ipcMain.handle(
       }
     }
     resetAutoLockTimer();
-    return { ok: true };
+    return { ok: true, recoveryKey };
   }
 );
 
@@ -251,7 +292,8 @@ ipcMain.handle(
       }
     }
     resetAutoLockTimer();
-    return { ok: true };
+    const recoveryKey = takePendingRecoveryKey();
+    return { ok: true, recoveryKey };
   }
 );
 
@@ -266,6 +308,27 @@ ipcMain.handle("vault:unlockTouchID", async () => {
   resetAutoLockTimer();
   return { ok: true };
 });
+
+ipcMain.handle(
+  "vault:unlockRecovery",
+  async (_e, recoveryKey: string, newPassword: string) => {
+    await unlockWithRecoveryKey(recoveryKey, newPassword);
+    // Wipe any Touch ID key — old DEK is unchanged but the user is going
+    // through recovery, so they should re-enable from a known good state.
+    if (await hasStoredKey()) await deleteStoredKey();
+    resetAutoLockTimer();
+    return { ok: true };
+  }
+);
+
+ipcMain.handle("vault:hasRecoveryKey", () => hasRecoveryKey());
+
+ipcMain.handle("vault:rotateRecoveryKey", async () => {
+  resetAutoLockTimer();
+  return await rotateRecoveryKey();
+});
+
+ipcMain.handle("vault:takePendingRecoveryKey", () => takePendingRecoveryKey());
 
 ipcMain.handle("vault:lock", () => {
   lock();
@@ -302,7 +365,8 @@ ipcMain.handle(
     // Invalidate any stored Touch ID key — user must re-enable.
     if (await hasStoredKey()) await deleteStoredKey();
     resetAutoLockTimer();
-    return { ok: true };
+    const recoveryKey = takePendingRecoveryKey();
+    return { ok: true, recoveryKey };
   }
 );
 
@@ -310,6 +374,16 @@ ipcMain.handle("vault:hasTouchIDSetup", () => hasStoredKey());
 
 ipcMain.handle("vault:disableTouchID", async () => {
   if (await hasStoredKey()) await deleteStoredKey();
+  return { ok: true };
+});
+
+ipcMain.handle("vault:enableTouchID", async () => {
+  if (!isTouchIDAvailable()) throw new Error("Touch ID is not available");
+  if (!isUnlocked()) throw new Error("Vault must be unlocked");
+  const ok = await promptTouchID("save the encryption key for quick unlock");
+  if (!ok) return { ok: false };
+  const keyB64 = getCachedKeyB64();
+  if (keyB64) await storeKey(keyB64);
   return { ok: true };
 });
 
@@ -358,6 +432,124 @@ ipcMain.handle(
     return await bulkAddEntries(inputs, { skipDuplicates });
   }
 );
+
+ipcMain.handle("vault:exportCsv", async () => {
+  if (!isUnlocked()) throw new Error("Vault must be unlocked");
+  resetAutoLockTimer();
+  const entries = listEntries();
+  const csv = entriesToCsv(entries);
+  const stamp = new Date().toISOString().slice(0, 10);
+  const res = await dialog.showSaveDialog({
+    title: "Export vault to CSV",
+    defaultPath: `keyring-export-${stamp}.csv`,
+    filters: [{ name: "CSV", extensions: ["csv"] }],
+  });
+  if (res.canceled || !res.filePath) return { ok: false };
+  await fs.writeFile(res.filePath, csv, { mode: 0o600 });
+  return { ok: true, count: entries.length, path: res.filePath };
+});
+
+ipcMain.handle("vault:exportBitwardenJson", async () => {
+  if (!isUnlocked()) throw new Error("Vault must be unlocked");
+  resetAutoLockTimer();
+  const entries = listEntries();
+  const json = entriesToBitwardenJson(entries);
+  const stamp = new Date().toISOString().slice(0, 10);
+  const res = await dialog.showSaveDialog({
+    title: "Export vault to Bitwarden JSON",
+    defaultPath: `keyring-export-${stamp}.json`,
+    filters: [{ name: "JSON", extensions: ["json"] }],
+  });
+  if (res.canceled || !res.filePath) return { ok: false };
+  await fs.writeFile(res.filePath, json, { mode: 0o600 });
+  return { ok: true, count: entries.length, path: res.filePath };
+});
+
+ipcMain.handle("vault:exportBackup", async () => {
+  resetAutoLockTimer();
+  const stamp = new Date().toISOString().slice(0, 10);
+  const res = await dialog.showSaveDialog({
+    title: "Save encrypted backup",
+    defaultPath: `keyring-backup-${stamp}.enc`,
+    filters: [{ name: "Encrypted backup", extensions: ["enc"] }],
+  });
+  if (res.canceled || !res.filePath) return { ok: false };
+  const bytes = await readEncryptedFileBytes();
+  await fs.writeFile(res.filePath, bytes, { mode: 0o600 });
+  return { ok: true, path: res.filePath, bytes: bytes.length };
+});
+
+ipcMain.handle("system:printRecoveryKey", async (_e, recoveryKey: string) => {
+  const printWindow = new BrowserWindow({
+    show: false,
+    width: 800,
+    height: 1000,
+    webPreferences: {
+      offscreen: false,
+    },
+  });
+
+  const html = renderRecoveryKeyHtml(recoveryKey);
+  await printWindow.loadURL(
+    "data:text/html;charset=utf-8," + encodeURIComponent(html)
+  );
+
+  return new Promise<{ ok: boolean }>((resolve) => {
+    printWindow.webContents.print(
+      { silent: false, printBackground: true },
+      (success) => {
+        printWindow.destroy();
+        resolve({ ok: success });
+      }
+    );
+  });
+});
+
+function renderRecoveryKeyHtml(recoveryKey: string): string {
+  const stamp = new Date().toISOString().slice(0, 10);
+  const vaultLoc = getVaultPath();
+  return `<!doctype html>
+<html><head><meta charset="utf-8"><title>Keyring Recovery Key</title>
+<style>
+  @page { size: letter; margin: 0.75in; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    color: #111; background: #fff; margin: 0; padding: 0; line-height: 1.5;
+  }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  .meta { color: #666; font-size: 11px; margin-bottom: 22px; }
+  .key {
+    font-family: "SF Mono", "Menlo", monospace;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    background: #f5f5f7; border: 1px solid #d2d2d7; border-radius: 8px;
+    padding: 18px 22px; margin: 18px 0;
+    word-break: break-all;
+  }
+  p { font-size: 13px; }
+  .warn { background: #fff5dc; border: 1px solid #f0d97a; border-radius: 8px; padding: 12px 14px; font-size: 12px; }
+  .small { font-size: 11px; color: #666; }
+  hr { border: none; border-top: 1px solid #e3e3e7; margin: 22px 0; }
+</style></head>
+<body>
+  <h1>Keyring — Recovery Key</h1>
+  <div class="meta">Generated ${stamp} · vault stored at <code>${vaultLoc}</code></div>
+
+  <p>If you forget your master password, this is the only way back into your vault. Keep it somewhere safe — a fireproof box, a safe deposit box, or with a trusted person.</p>
+
+  <div class="key">${recoveryKey}</div>
+
+  <div class="warn">
+    <strong>Anyone with this key can reset your vault password and read your data.</strong> Treat it like cash. Don't email it, don't take a photo with cloud sync, don't store it in another password manager you have access to from this machine.
+  </div>
+
+  <hr/>
+
+  <p class="small">To use this key: open Keyring → on the unlock screen tap "Forgot password? Use recovery key" → paste this key → choose a new master password.</p>
+  <p class="small">Keyring will never ask for this key over email or chat. There is no Keyring support that can help you recover your data — losing both the master password and this key means the data is unrecoverable.</p>
+</body></html>`;
+}
 
 ipcMain.handle("overlay:hide", () => {
   hideOverlay();
@@ -420,3 +612,10 @@ ipcMain.handle("vault:setGlobalSettings", async (_e, patch: Record<string, unkno
   return { ok: true };
 });
 
+ipcMain.handle("updater:status", () => getUpdateStatus());
+ipcMain.handle("updater:check", async () => await checkNow());
+ipcMain.handle("updater:install", async () => {
+  await installNow();
+  return { ok: true };
+});
+ipcMain.handle("app:version", () => getCurrentVersion());

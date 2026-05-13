@@ -8,6 +8,11 @@ const api = {
   unlockWithPassword: (masterPassword: string, enableTouchID: boolean) =>
     ipcRenderer.invoke("vault:unlockPassword", masterPassword, enableTouchID),
   unlockWithTouchID: () => ipcRenderer.invoke("vault:unlockTouchID"),
+  unlockWithRecoveryKey: (recoveryKey: string, newPassword: string) =>
+    ipcRenderer.invoke("vault:unlockRecovery", recoveryKey, newPassword),
+  hasRecoveryKey: () => ipcRenderer.invoke("vault:hasRecoveryKey"),
+  rotateRecoveryKey: () => ipcRenderer.invoke("vault:rotateRecoveryKey"),
+  takePendingRecoveryKey: () => ipcRenderer.invoke("vault:takePendingRecoveryKey"),
   lock: () => ipcRenderer.invoke("vault:lock"),
   list: () => ipcRenderer.invoke("vault:list"),
   add: (entry: unknown) => ipcRenderer.invoke("vault:add", entry),
@@ -36,6 +41,7 @@ const api = {
     ipcRenderer.invoke("vault:changeMaster", current, next),
   hasTouchIDSetup: () => ipcRenderer.invoke("vault:hasTouchIDSetup"),
   disableTouchID: () => ipcRenderer.invoke("vault:disableTouchID"),
+  enableTouchID: () => ipcRenderer.invoke("vault:enableTouchID"),
   isTouchIDAvailable: () => ipcRenderer.invoke("system:isTouchIDAvailable"),
   generatePassword: (opts: unknown) => ipcRenderer.invoke("system:generatePassword", opts),
   totpCode: (id: string) => ipcRenderer.invoke("vault:totpCode", id),
@@ -48,6 +54,21 @@ const api = {
     ipcRenderer.on("menu:import", listener);
     return () => ipcRenderer.removeListener("menu:import", listener);
   },
+  onExportRequested: (cb: () => void) => {
+    const listener = () => cb();
+    ipcRenderer.on("menu:export", listener);
+    return () => ipcRenderer.removeListener("menu:export", listener);
+  },
+  onSettingsRequested: (cb: () => void) => {
+    const listener = () => cb();
+    ipcRenderer.on("menu:settings", listener);
+    return () => ipcRenderer.removeListener("menu:settings", listener);
+  },
+  exportCsv: () => ipcRenderer.invoke("vault:exportCsv"),
+  exportBitwardenJson: () => ipcRenderer.invoke("vault:exportBitwardenJson"),
+  exportEncryptedBackup: () => ipcRenderer.invoke("vault:exportBackup"),
+  printRecoveryKey: (recoveryKey: string) =>
+    ipcRenderer.invoke("system:printRecoveryKey", recoveryKey),
   copyToClipboard: (value: string) => {
     clipboard.writeText(value);
   },
@@ -83,6 +104,15 @@ const api = {
     const listener = () => cb();
     ipcRenderer.on("overlay:shown", listener);
     return () => ipcRenderer.removeListener("overlay:shown", listener);
+  },
+  updaterStatus: () => ipcRenderer.invoke("updater:status"),
+  updaterCheck: () => ipcRenderer.invoke("updater:check"),
+  updaterInstall: () => ipcRenderer.invoke("updater:install"),
+  appVersion: () => ipcRenderer.invoke("app:version"),
+  onUpdaterStatus: (cb: (status: unknown) => void) => {
+    const listener = (_e: unknown, status: unknown) => cb(status);
+    ipcRenderer.on("updater:status", listener);
+    return () => ipcRenderer.removeListener("updater:status", listener);
   },
 };
 

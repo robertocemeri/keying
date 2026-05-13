@@ -1,7 +1,7 @@
 import { app } from "electron";
 import { promises as fs } from "fs";
 import path from "path";
-import { randomUUID } from "crypto";
+import { randomBytes, randomUUID } from "crypto";
 import {
   deriveKey,
   encryptWithKey,
@@ -43,7 +43,7 @@ function migrateData(raw: unknown): VaultData {
   const obj = (raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {}) as Record<string, unknown>;
   const entriesIn = Array.isArray(obj.entries) ? (obj.entries as Record<string, unknown>[]) : [];
   const entries: Entry[] = entriesIn.map((e) => ({
-    id: String(e.id ?? ""),
+    id: String(e.id ?? randomUUID()),
     title: String(e.title ?? ""),
     username: String(e.username ?? ""),
     password: String(e.password ?? ""),
@@ -84,20 +84,43 @@ function migrateData(raw: unknown): VaultData {
   return { entries, folders, folderSettings, globalSettings };
 }
 
-type VaultFile = {
+type VaultFileV1 = {
   v: 1;
   saltB64: string;
   blob: EncryptedBlob;
 };
 
+// v2 introduces key-wrapping: a random Data Encryption Key (DEK) is generated
+// once at vault creation. The DEK encrypts the data blob. The DEK itself is
+// wrapped separately by (a) the password-derived key, and (b) optionally by a
+// recovery-key-derived key. This lets us add a recovery key, change the
+// master password, or rotate the recovery key without re-encrypting the data.
+type VaultFileV2 = {
+  v: 2;
+  pw: {
+    saltB64: string;
+    wrapped: EncryptedBlob;
+  };
+  rec?: {
+    saltB64: string;
+    wrapped: EncryptedBlob;
+  };
+  blob: EncryptedBlob;
+};
+
+type VaultFile = VaultFileV1 | VaultFileV2;
+
 const VAULT_FILENAME = "vault.enc";
 
-let cachedKey: Buffer | null = null;
-let cachedSalt: Buffer | null = null;
+let cachedDek: Buffer | null = null;
 let cachedData: VaultData | null = null;
 
 function vaultPath(): string {
   return path.join(app.getPath("userData"), VAULT_FILENAME);
+}
+
+export function getVaultPath(): string {
+  return vaultPath();
 }
 
 export async function vaultExists(): Promise<boolean> {
@@ -120,72 +143,216 @@ async function writeVaultFile(file: VaultFile): Promise<void> {
   await fs.rename(tmp, vaultPath());
 }
 
-export async function getSaltIfExists(): Promise<Buffer | null> {
-  if (!(await vaultExists())) return null;
-  const file = await readVaultFile();
-  return Buffer.from(file.saltB64, "base64");
+function generateDek(): Buffer {
+  return randomBytes(32);
 }
 
-export async function createVault(masterPassword: string): Promise<void> {
+function wrapDek(wrappingKey: Buffer, dek: Buffer, salt: Buffer): EncryptedBlob {
+  return encryptWithKey(wrappingKey, dek.toString("base64"), salt);
+}
+
+function unwrapDek(wrappingKey: Buffer, blob: EncryptedBlob): Buffer {
+  const decoded = decryptWithKey(wrappingKey, blob);
+  return Buffer.from(decoded, "base64");
+}
+
+export async function createVault(masterPassword: string): Promise<{ recoveryKey: string }> {
   if (await vaultExists()) {
     throw new Error("Vault already exists");
   }
-  const salt = generateSalt();
-  const key = deriveKey(masterPassword, salt);
+
+  const dek = generateDek();
+  const pwSalt = generateSalt();
+  const pwKey = deriveKey(masterPassword, pwSalt);
+  const pwWrapped = wrapDek(pwKey, dek, pwSalt);
+
+  const { generateRecoveryKey, formatRecoveryKey } = await import("./recovery");
+  const { groups, raw: recRaw } = generateRecoveryKey();
+  const recSalt = generateSalt();
+  const recKey = deriveKey(recRaw.toString("base64"), recSalt);
+  const recWrapped = wrapDek(recKey, dek, recSalt);
+
   const data: VaultData = { entries: [], folders: [], folderSettings: {}, globalSettings: {} };
-  const blob = encryptWithKey(key, JSON.stringify(data), salt);
-  await writeVaultFile({ v: 1, saltB64: salt.toString("base64"), blob });
-  cachedKey = key;
-  cachedSalt = salt;
+  const dataBlob = encryptWithKey(dek, JSON.stringify(data), generateSalt());
+
+  await writeVaultFile({
+    v: 2,
+    pw: { saltB64: pwSalt.toString("base64"), wrapped: pwWrapped },
+    rec: { saltB64: recSalt.toString("base64"), wrapped: recWrapped },
+    blob: dataBlob,
+  });
+
+  cachedDek = dek;
   cachedData = data;
+  return { recoveryKey: formatRecoveryKey(groups) };
+}
+
+async function migrateV1ToV2(file: VaultFileV1, masterPassword: string): Promise<{ file: VaultFileV2; dek: Buffer; data: VaultData; recoveryKey: string }> {
+  const oldSalt = Buffer.from(file.saltB64, "base64");
+  const oldKey = deriveKey(masterPassword, oldSalt);
+  const plaintext = decryptWithKey(oldKey, file.blob);
+  const data = migrateData(JSON.parse(plaintext));
+
+  const dek = generateDek();
+  const pwSalt = generateSalt();
+  const pwKey = deriveKey(masterPassword, pwSalt);
+  const pwWrapped = wrapDek(pwKey, dek, pwSalt);
+
+  const { generateRecoveryKey, formatRecoveryKey } = await import("./recovery");
+  const { groups, raw: recRaw } = generateRecoveryKey();
+  const recSalt = generateSalt();
+  const recKey = deriveKey(recRaw.toString("base64"), recSalt);
+  const recWrapped = wrapDek(recKey, dek, recSalt);
+
+  const dataBlob = encryptWithKey(dek, JSON.stringify(data), generateSalt());
+  const newFile: VaultFileV2 = {
+    v: 2,
+    pw: { saltB64: pwSalt.toString("base64"), wrapped: pwWrapped },
+    rec: { saltB64: recSalt.toString("base64"), wrapped: recWrapped },
+    blob: dataBlob,
+  };
+  await writeVaultFile(newFile);
+  return { file: newFile, dek, data, recoveryKey: formatRecoveryKey(groups) };
+}
+
+let pendingMigrationRecoveryKey: string | null = null;
+
+export function takePendingRecoveryKey(): string | null {
+  const k = pendingMigrationRecoveryKey;
+  pendingMigrationRecoveryKey = null;
+  return k;
 }
 
 export async function unlockWithPassword(masterPassword: string): Promise<void> {
   const file = await readVaultFile();
-  const salt = Buffer.from(file.saltB64, "base64");
-  const key = deriveKey(masterPassword, salt);
-  const plaintext = decryptWithKey(key, file.blob);
-  cachedKey = key;
-  cachedSalt = salt;
+  if (file.v === 1) {
+    // Auto-migrate to v2 — generate a recovery key and surface it to the UI.
+    const migrated = await migrateV1ToV2(file, masterPassword);
+    cachedDek = migrated.dek;
+    cachedData = migrated.data;
+    pendingMigrationRecoveryKey = migrated.recoveryKey;
+    return;
+  }
+  const pwSalt = Buffer.from(file.pw.saltB64, "base64");
+  const pwKey = deriveKey(masterPassword, pwSalt);
+  const dek = unwrapDek(pwKey, file.pw.wrapped);
+  const plaintext = decryptWithKey(dek, file.blob);
+  cachedDek = dek;
   cachedData = migrateData(JSON.parse(plaintext));
 }
 
 export async function unlockWithKey(keyB64: string): Promise<void> {
   const file = await readVaultFile();
-  const salt = Buffer.from(file.saltB64, "base64");
-  const key = Buffer.from(keyB64, "base64");
-  const plaintext = decryptWithKey(key, file.blob);
-  cachedKey = key;
-  cachedSalt = salt;
+  if (file.v === 1) {
+    // Touch ID stored an old-format key. Decrypt with it directly.
+    const key = Buffer.from(keyB64, "base64");
+    const plaintext = decryptWithKey(key, file.blob);
+    cachedDek = key;
+    cachedData = migrateData(JSON.parse(plaintext));
+    return;
+  }
+  const dek = Buffer.from(keyB64, "base64");
+  const plaintext = decryptWithKey(dek, file.blob);
+  cachedDek = dek;
   cachedData = migrateData(JSON.parse(plaintext));
 }
 
+export async function unlockWithRecoveryKey(recoveryKeyInput: string, newPassword: string): Promise<{ ok: true }> {
+  const { parseRecoveryKey } = await import("./recovery");
+  const recRaw = parseRecoveryKey(recoveryKeyInput);
+  if (!recRaw) throw new Error("That doesn't look like a Keyring recovery key.");
+  const file = await readVaultFile();
+  if (file.v !== 2 || !file.rec) {
+    throw new Error("This vault has no recovery key. You'll need the master password.");
+  }
+  if (!newPassword || newPassword.length < 8) {
+    throw new Error("New password must be at least 8 characters.");
+  }
+  const recSalt = Buffer.from(file.rec.saltB64, "base64");
+  const recKey = deriveKey(recRaw.toString("base64"), recSalt);
+  let dek: Buffer;
+  try {
+    dek = unwrapDek(recKey, file.rec.wrapped);
+  } catch {
+    throw new Error("Recovery key didn't match. Check for typos.");
+  }
+  const plaintext = decryptWithKey(dek, file.blob);
+  const data = migrateData(JSON.parse(plaintext));
+
+  // Re-wrap the DEK with the new password. Keep the recovery wrapper as-is so
+  // the same printed recovery key keeps working.
+  const newPwSalt = generateSalt();
+  const newPwKey = deriveKey(newPassword, newPwSalt);
+  const newPwWrapped = wrapDek(newPwKey, dek, newPwSalt);
+  await writeVaultFile({
+    v: 2,
+    pw: { saltB64: newPwSalt.toString("base64"), wrapped: newPwWrapped },
+    rec: file.rec,
+    blob: file.blob,
+  });
+  cachedDek = dek;
+  cachedData = data;
+  return { ok: true };
+}
+
+export async function rotateRecoveryKey(): Promise<{ recoveryKey: string }> {
+  ensureUnlocked();
+  const file = await readVaultFile();
+  if (file.v !== 2) throw new Error("Vault must be on v2 format.");
+  const { generateRecoveryKey, formatRecoveryKey } = await import("./recovery");
+  const { groups, raw: recRaw } = generateRecoveryKey();
+  const recSalt = generateSalt();
+  const recKey = deriveKey(recRaw.toString("base64"), recSalt);
+  const recWrapped = wrapDek(recKey, cachedDek!, recSalt);
+  await writeVaultFile({
+    v: 2,
+    pw: file.pw,
+    rec: { saltB64: recSalt.toString("base64"), wrapped: recWrapped },
+    blob: file.blob,
+  });
+  return { recoveryKey: formatRecoveryKey(groups) };
+}
+
+export async function hasRecoveryKey(): Promise<boolean> {
+  if (!(await vaultExists())) return false;
+  const file = await readVaultFile();
+  return file.v === 2 && !!file.rec;
+}
+
 export function getCachedKeyB64(): string | null {
-  return cachedKey ? cachedKey.toString("base64") : null;
+  return cachedDek ? cachedDek.toString("base64") : null;
 }
 
 export function isUnlocked(): boolean {
-  return cachedKey !== null && cachedData !== null;
+  return cachedDek !== null && cachedData !== null;
 }
 
 export function lock(): void {
-  if (cachedKey) cachedKey.fill(0);
-  cachedKey = null;
-  cachedSalt = null;
+  if (cachedDek) cachedDek.fill(0);
+  cachedDek = null;
   cachedData = null;
 }
 
-function ensureUnlocked(): { key: Buffer; salt: Buffer; data: VaultData } {
-  if (!cachedKey || !cachedSalt || !cachedData) {
+function ensureUnlocked(): { dek: Buffer; data: VaultData } {
+  if (!cachedDek || !cachedData) {
     throw new Error("Vault is locked");
   }
-  return { key: cachedKey, salt: cachedSalt, data: cachedData };
+  return { dek: cachedDek, data: cachedData };
 }
 
 async function persist(): Promise<void> {
-  const { key, salt, data } = ensureUnlocked();
-  const blob = encryptWithKey(key, JSON.stringify(data), salt);
-  await writeVaultFile({ v: 1, saltB64: salt.toString("base64"), blob });
+  const { dek, data } = ensureUnlocked();
+  const file = await readVaultFile();
+  if (file.v === 1) {
+    throw new Error("Internal: expected v2 vault for persist");
+  }
+  const blob = encryptWithKey(dek, JSON.stringify(data), generateSalt());
+  await writeVaultFile({
+    v: 2,
+    pw: file.pw,
+    rec: file.rec,
+    blob,
+  });
 }
 
 export function listEntries(): Entry[] {
@@ -267,8 +434,6 @@ export async function deleteEntry(id: string): Promise<void> {
 
 export function listFolders(): string[] {
   const { data } = ensureUnlocked();
-  // Insertion-order folders first, then any folders that exist on entries
-  // but aren't in the explicit list (appended in entry order for stability).
   const seen = new Set<string>();
   const out: string[] = [];
   for (const f of data.folders) {
@@ -333,7 +498,6 @@ export async function setFolderSettings(
 ): Promise<void> {
   const { data } = ensureUnlocked();
   const next: FolderSettings = { ...(data.folderSettings[name] ?? {}), ...patch };
-  // Drop falsy keys so the file stays clean.
   if (next.autofillDisabled !== true) delete next.autofillDisabled;
   if (Object.keys(next).length === 0) {
     delete data.folderSettings[name];
@@ -366,8 +530,6 @@ export function isAutofillAllowed(entry: Entry): boolean {
 
 export async function reorderFolders(order: string[]): Promise<void> {
   const { data } = ensureUnlocked();
-  // Trust the renderer's order but constrain it to known folder names.
-  // Append any folders missing from the new order (defensive against races).
   const known = new Set([...data.folders, ...data.entries.map((e) => e.folder).filter(Boolean)]);
   const seen = new Set<string>();
   const next: string[] = [];
@@ -389,17 +551,45 @@ export async function changeMasterPassword(
   newPassword: string
 ): Promise<void> {
   const file = await readVaultFile();
-  const oldSalt = Buffer.from(file.saltB64, "base64");
-  const oldKey = deriveKey(currentPassword, oldSalt);
-  const plaintext = decryptWithKey(oldKey, file.blob);
-  const data = JSON.parse(plaintext);
+  if (file.v === 1) {
+    // Migrate while changing password.
+    const migrated = await migrateV1ToV2(file, currentPassword);
+    cachedDek = migrated.dek;
+    cachedData = migrated.data;
+    pendingMigrationRecoveryKey = migrated.recoveryKey;
+    // Now re-wrap with new password.
+    const newSalt = generateSalt();
+    const newKey = deriveKey(newPassword, newSalt);
+    const newWrapped = wrapDek(newKey, cachedDek, newSalt);
+    await writeVaultFile({
+      v: 2,
+      pw: { saltB64: newSalt.toString("base64"), wrapped: newWrapped },
+      rec: migrated.file.rec,
+      blob: migrated.file.blob,
+    });
+    return;
+  }
+  // v2: verify current password by unwrapping
+  const oldPwSalt = Buffer.from(file.pw.saltB64, "base64");
+  const oldPwKey = deriveKey(currentPassword, oldPwSalt);
+  let dek: Buffer;
+  try {
+    dek = unwrapDek(oldPwKey, file.pw.wrapped);
+  } catch {
+    throw new Error("Current password is incorrect.");
+  }
+  const newPwSalt = generateSalt();
+  const newPwKey = deriveKey(newPassword, newPwSalt);
+  const newPwWrapped = wrapDek(newPwKey, dek, newPwSalt);
+  await writeVaultFile({
+    v: 2,
+    pw: { saltB64: newPwSalt.toString("base64"), wrapped: newPwWrapped },
+    rec: file.rec,
+    blob: file.blob,
+  });
+  cachedDek = dek;
+}
 
-  const migrated = migrateData(data);
-  const newSalt = generateSalt();
-  const newKey = deriveKey(newPassword, newSalt);
-  const blob = encryptWithKey(newKey, JSON.stringify(migrated), newSalt);
-  await writeVaultFile({ v: 1, saltB64: newSalt.toString("base64"), blob });
-  cachedKey = newKey;
-  cachedSalt = newSalt;
-  cachedData = migrated;
+export async function readEncryptedFileBytes(): Promise<Buffer> {
+  return fs.readFile(vaultPath());
 }

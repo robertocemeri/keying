@@ -4,6 +4,8 @@ import UnlockScreen from "./components/UnlockScreen";
 import VaultScreen from "./components/VaultScreen";
 import PairingOverlay from "./components/PairingOverlay";
 import ImportModal from "./components/ImportModal";
+import ExportModal from "./components/ExportModal";
+import SettingsDrawer from "./components/SettingsDrawer";
 import "./types";
 
 type AppState =
@@ -14,6 +16,7 @@ type AppState =
 
 export default function App() {
   const [state, setState] = useState<AppState>({ kind: "loading" });
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   async function boot() {
     const exists = await window.vault.vaultExists();
@@ -35,8 +38,17 @@ export default function App() {
 
   useEffect(() => {
     boot();
-    const off = window.vault.onLockEvent(() => boot());
-    return off;
+    const offLock = window.vault.onLockEvent(() => {
+      setSettingsOpen(false);
+      boot();
+    });
+    const offSettings = window.vault.onSettingsRequested(() => {
+      setSettingsOpen(true);
+    });
+    return () => {
+      offLock();
+      offSettings();
+    };
   }, []);
 
   return (
@@ -55,12 +67,20 @@ export default function App() {
           />
         )}
         {state.kind === "unlocked" && (
-          <VaultScreen onLocked={() => boot()} />
+          <VaultScreen
+            onLocked={() => boot()}
+            onOpenSettings={() => setSettingsOpen(true)}
+          />
         )}
       </div>
       <PairingOverlay />
       <ImportModal
         onImported={() => window.dispatchEvent(new CustomEvent("keyring:import-complete"))}
+      />
+      <ExportModal />
+      <SettingsDrawer
+        open={settingsOpen && state.kind === "unlocked"}
+        onClose={() => setSettingsOpen(false)}
       />
     </div>
   );

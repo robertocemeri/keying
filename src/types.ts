@@ -44,14 +44,42 @@ export type GeneratorOptions = {
   symbols: boolean;
 };
 
+export type UpdateStatus =
+  | { state: "idle" }
+  | { state: "checking" }
+  | { state: "available"; version: string }
+  | { state: "not-available"; version: string }
+  | { state: "downloading"; percent: number }
+  | { state: "ready"; version: string }
+  | { state: "error"; message: string };
+
+export type PairedClient = {
+  client: string;
+  createdAt: number;
+  lastUsed: number;
+};
+
 declare global {
   interface Window {
     vault: {
       vaultExists(): Promise<boolean>;
       isUnlocked(): Promise<boolean>;
-      setup(masterPassword: string, enableTouchID: boolean): Promise<{ ok: true }>;
-      unlockWithPassword(masterPassword: string, enableTouchID: boolean): Promise<{ ok: true }>;
+      setup(
+        masterPassword: string,
+        enableTouchID: boolean
+      ): Promise<{ ok: true; recoveryKey: string }>;
+      unlockWithPassword(
+        masterPassword: string,
+        enableTouchID: boolean
+      ): Promise<{ ok: true; recoveryKey: string | null }>;
       unlockWithTouchID(): Promise<{ ok: true }>;
+      unlockWithRecoveryKey(
+        recoveryKey: string,
+        newPassword: string
+      ): Promise<{ ok: true }>;
+      hasRecoveryKey(): Promise<boolean>;
+      rotateRecoveryKey(): Promise<{ recoveryKey: string }>;
+      takePendingRecoveryKey(): Promise<string | null>;
       lock(): Promise<{ ok: true }>;
       list(): Promise<Entry[]>;
       add(entry: Omit<Entry, "id" | "createdAt" | "updatedAt">): Promise<Entry>;
@@ -71,9 +99,13 @@ declare global {
       hideOverlay(): Promise<{ ok: true }>;
       showOverlay(): Promise<{ ok: true }>;
       onOverlayShown(cb: () => void): () => void;
-      changeMasterPassword(current: string, next: string): Promise<{ ok: true }>;
+      changeMasterPassword(
+        current: string,
+        next: string
+      ): Promise<{ ok: true; recoveryKey: string | null }>;
       hasTouchIDSetup(): Promise<boolean>;
       disableTouchID(): Promise<{ ok: true }>;
+      enableTouchID(): Promise<{ ok: boolean }>;
       isTouchIDAvailable(): Promise<boolean>;
       generatePassword(opts: GeneratorOptions): Promise<string>;
       totpCode(id: string): Promise<TotpCode | null>;
@@ -84,15 +116,26 @@ declare global {
         skipDuplicates: boolean
       ): Promise<{ imported: number; skipped: number }>;
       onImportRequested(cb: () => void): () => void;
+      onExportRequested(cb: () => void): () => void;
+      onSettingsRequested(cb: () => void): () => void;
+      exportCsv(): Promise<{ ok: boolean; count?: number; path?: string }>;
+      exportBitwardenJson(): Promise<{ ok: boolean; count?: number; path?: string }>;
+      exportEncryptedBackup(): Promise<{ ok: boolean; path?: string; bytes?: number }>;
+      printRecoveryKey(recoveryKey: string): Promise<{ ok: boolean }>;
       copyToClipboard(value: string): void;
       clearClipboard(): void;
       onLockEvent(cb: () => void): () => void;
       onPairingPrompt(cb: (info: { code: string; client: string }) => void): () => void;
       onPairingCompleted(cb: (info: { client: string }) => void): () => void;
       onPairingCancelled(cb: () => void): () => void;
-      listPairedClients(): Promise<{ client: string; createdAt: number; lastUsed: number }[]>;
+      listPairedClients(): Promise<PairedClient[]>;
       revokeAllPairedClients(): Promise<void>;
       cancelPairing(): Promise<void>;
+      updaterStatus(): Promise<UpdateStatus>;
+      updaterCheck(): Promise<UpdateStatus>;
+      updaterInstall(): Promise<{ ok: true }>;
+      appVersion(): Promise<string>;
+      onUpdaterStatus(cb: (status: UpdateStatus) => void): () => void;
     };
   }
 }

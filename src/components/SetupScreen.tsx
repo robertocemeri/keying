@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import RecoveryKeyDisplay from "./RecoveryKeyDisplay";
 
 export default function SetupScreen({ onDone }: { onDone: () => void }) {
   const [pw, setPw] = useState("");
@@ -7,6 +8,7 @@ export default function SetupScreen({ onDone }: { onDone: () => void }) {
   const [touchIDAvailable, setTouchIDAvailable] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
 
   useEffect(() => {
     window.vault.isTouchIDAvailable().then(setTouchIDAvailable);
@@ -25,15 +27,28 @@ export default function SetupScreen({ onDone }: { onDone: () => void }) {
     }
     setBusy(true);
     try {
-      await window.vault.setup(pw, touchID && touchIDAvailable);
+      const res = await window.vault.setup(pw, touchID && touchIDAvailable);
       setPw("");
       setConfirm("");
-      onDone();
+      setRecoveryKey(res.recoveryKey);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
     }
+  }
+
+  if (recoveryKey) {
+    return (
+      <RecoveryKeyDisplay
+        recoveryKey={recoveryKey}
+        context="setup"
+        onDone={() => {
+          setRecoveryKey(null);
+          onDone();
+        }}
+      />
+    );
   }
 
   return (
@@ -46,7 +61,7 @@ export default function SetupScreen({ onDone }: { onDone: () => void }) {
           </div>
           <h1 className="text-3xl font-semibold tracking-tight">Create your master password.</h1>
           <p className="text-sm text-ink-400 leading-relaxed">
-            This password encrypts everything in your vault. We can't recover it — if you forget it, your data is gone.
+            This password encrypts everything in your vault. We can't recover it — but you'll get a one-time recovery key after this step in case you forget it.
           </p>
         </header>
 
