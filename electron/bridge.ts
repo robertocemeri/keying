@@ -34,6 +34,7 @@ type PendingPairing = {
   code: string;
   client: string;
   createdAt: number;
+  initiator: "app" | "extension";
   resolve: (token: string | null) => void;
 };
 
@@ -101,6 +102,7 @@ export function startPairingFromApp(client: string): {
     code,
     client,
     createdAt: Date.now(),
+    initiator: "app",
     resolve: () => {},
   };
   // Still broadcast in case any renderer is listening — harmless if not.
@@ -216,15 +218,22 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse): Prom
     } catch {
       /* tolerate */
     }
+    // Don't blow away an app-initiated pending pairing — the user already
+    // sees that code in the desktop app and is about to type it here.
+    // Re-use it instead of replacing it (which would cause "wrong code" the
+    // moment the user typed the one shown in the app).
+    if (pending && pending.initiator === "app") {
+      sendJson(res, 200, { ok: true, appInitiated: true });
+      return;
+    }
     if (pending) {
-      // Cancel previous pending
       pending.resolve(null);
       pending = null;
     }
     const code = sixDigitCode();
     broadcastToAll("bridge:pairing-prompt", { code, client });
     const tokenPromise = new Promise<string | null>((resolve) => {
-      pending = { code, client, createdAt: Date.now(), resolve };
+      pending = { code, client, createdAt: Date.now(), initiator: "extension", resolve };
     });
     // Auto-expire pairing after 90s
     const timer = setTimeout(() => {
