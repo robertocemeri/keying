@@ -176,8 +176,10 @@ app.whenReady().then(async () => {
       app.on("browser-window-created", (_e, win) => {
         applyDockIcon();
         win.webContents.on("did-finish-load", applyDockIcon);
+        win.on("focus", applyDockIcon);
       });
       app.on("activate", applyDockIcon);
+      app.on("browser-window-focus", applyDockIcon);
     }
   }
 
