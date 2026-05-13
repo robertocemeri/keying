@@ -10,12 +10,14 @@
   <true/>
   <key>com.apple.security.cs.disable-library-validation</key>
   <true/>
-  <!-- keytar needs Keychain access. -->
-  <key>keychain-access-groups</key>
-  <array>
-    <string>$(AppIdentifierPrefix)com.cemeri.keying</string>
-  </array>
   <!-- We listen on 127.0.0.1 for the browser extension bridge. -->
+  <!-- Note: keytar (Keychain Services) does NOT need keychain-access-groups
+       for unsandboxed Developer ID-distributed apps. That entitlement is
+       only for sharing keychain items between apps with the same team ID,
+       and requires a provisioning profile we don't ship. Including it with
+       an unsubstituted $(AppIdentifierPrefix) caused amfid to kill the
+       process at launch with no useful error. -->
+
   <key>com.apple.security.network.server</key>
   <true/>
   <!-- Auto-updater downloads from GitHub. -->
