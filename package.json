@@ -20,7 +20,9 @@
     "electron:build": "tsc -p tsconfig.electron.json && vite build && electron-builder --mac",
     "extension:zip": "node scripts/build-extension.mjs",
     "promos:build": "node scripts/build-promos.mjs",
-    "release": "dotenv -e .env -- bash -c 'tsc -p tsconfig.electron.json && vite build && electron-builder --mac --publish always'"
+    "version:bump": "node scripts/bump-version.mjs",
+    "release": "node scripts/bump-version.mjs && dotenv -e .env -- bash -c 'tsc -p tsconfig.electron.json && vite build && electron-builder --mac --publish always'",
+    "release:nobump": "dotenv -e .env -- bash -c 'tsc -p tsconfig.electron.json && vite build && electron-builder --mac --publish always'"
   },
   "build": {
     "appId": "com.cemeri.keying",
