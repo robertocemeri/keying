@@ -18,6 +18,7 @@
     "electron:dev": "npm run setup:dev-icon && concurrently -k \"vite\" \"wait-on tcp:5173 && tsc -p tsconfig.electron.json && cross-env NODE_ENV=development electron .\"",
     "electron:build": "tsc -p tsconfig.electron.json && vite build && electron-builder --mac",
     "extension:zip": "node scripts/build-extension.mjs",
+    "promos:build": "node scripts/build-promos.mjs",
     "release": "dotenv -e .env -- bash -c 'tsc -p tsconfig.electron.json && vite build && electron-builder --mac --publish always'"
   },
   "build": {
@@ -77,6 +78,7 @@
     "keytar": "^7.9.0"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^22.10.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
