@@ -1,4 +1,4 @@
-# Keyring — Production Readiness Checklist
+# Keying — Production Readiness Checklist
 
 Status snapshot from 2026-05-13. Work through this when you're back.
 
@@ -20,7 +20,7 @@ Status snapshot from 2026-05-13. Work through this when you're back.
   - Put your Team ID into `package.json` → `build.mac.notarize.teamId` (replace placeholder)
 
 - [ ] **Pick a domain**
-  - Buy it, then global search/replace `https://keyring.app` in:
+  - Buy it, then global search/replace `https://keying.app` in:
     - `website/index.html`, `website/privacy.html`, `website/sitemap.xml`, `website/robots.txt`
     - `README.md`, `PRIVACY.md`
     - `store-listing/*.md`
@@ -44,7 +44,7 @@ Status snapshot from 2026-05-13. Work through this when you're back.
   This produces a signed + notarized `.dmg` in `release/` and uploads it as a draft GitHub Release. Edit the release notes, then publish.
 
 - [ ] **Submit the browser extension**
-  - `npm run extension:zip` → produces `release/keyring-extension.zip`
+  - `npm run extension:zip` → produces `release/keying-extension.zip`
   - Chrome Web Store: $5 one-time dev fee, upload zip, fill copy from `store-listing/chrome.md`
   - Firefox AMO: free, upload zip, fill copy from `store-listing/firefox.md`
   - Take 3–5 screenshots (1280×800 PNG) showing: vault, autofill prompt, settings
@@ -66,7 +66,7 @@ Run in order. Stop if any step fails and send me the error.
 
 ### A. Fresh install (dev mode: `npm run dev`)
 
-- [ ] Wipe data: `rm -rf ~/Library/Application\ Support/keyring`
+- [ ] Wipe data: `rm -rf ~/Library/Application\ Support/keying`
 - [ ] Open app → create vault → **write the recovery key on paper**
 - [ ] Add 3 entries, edit one, delete one
 - [ ] Quit the app, reopen → all entries persist
@@ -82,24 +82,24 @@ Run in order. Stop if any step fails and send me the error.
 
 ### C. v1 → v2 migration (MOST IMPORTANT — this is the path your real data takes)
 
-- [ ] Back up your real vault first: `cp ~/Library/Application\ Support/keyring/vault.json ~/Desktop/vault-backup-v1.json`
+- [ ] Back up your real vault first: `cp ~/Library/Application\ Support/keying/vault.json ~/Desktop/vault-backup-v1.json`
 - [ ] Open the app, unlock with password
 - [ ] UI should surface a new recovery key after unlock — write it down
 - [ ] Verify all your entries are still there
-- [ ] Open `~/Library/Application Support/keyring/vault.json` in a text editor → confirm `"v":2` at the top
+- [ ] Open `~/Library/Application Support/keying/vault.json` in a text editor → confirm `"v":2` at the top
 - [ ] Lock → unlock with Touch ID → should still work (this was the bug fixed in commit e462922)
 
 ### D. Export / import roundtrip
 
 - [ ] ⌘E → encrypted backup → save to Desktop
-- [ ] Quit, wipe data: `rm -rf ~/Library/Application\ Support/keyring`
+- [ ] Quit, wipe data: `rm -rf ~/Library/Application\ Support/keying`
 - [ ] Restart app → on the setup screen click "Import" → load the backup → entries restored
 - [ ] Export Bitwarden JSON → import into the Bitwarden web vault as a sanity check
 
 ### E. Browser extension end-to-end
 
 - [ ] `npm run extension:zip`
-- [ ] In Chrome: chrome://extensions → Developer mode on → "Load unpacked" → select `release/keyring-extension/`
+- [ ] In Chrome: chrome://extensions → Developer mode on → "Load unpacked" → select `release/keying-extension/`
 - [ ] Click the extension icon → pair with the desktop app
 - [ ] Visit a real login page (e.g. github.com/login) → trigger autofill → password fills correctly
 - [ ] Repeat in Firefox: about:debugging → Load Temporary Add-on → pick `manifest.json`
@@ -110,9 +110,9 @@ Run in order. Stop if any step fails and send me the error.
 - [ ] Mount the DMG, drag app to Applications, open it → **no Gatekeeper warning**
 - [ ] Verify signing + notarization:
   ```sh
-  spctl -a -t exec -v /Applications/Keyring.app
+  spctl -a -t exec -v /Applications/Keying.app
   # should report: accepted, source=Notarized Developer ID
-  codesign -dv --verbose=4 /Applications/Keyring.app
+  codesign -dv --verbose=4 /Applications/Keying.app
   ```
 
 ### G. Auto-update sanity
@@ -137,8 +137,8 @@ Run in order. Stop if any step fails and send me the error.
 
 ## 4. Quick reference: where things live
 
-- Vault file (your data): `~/Library/Application Support/keyring/vault.json`
-- Keychain entry (Touch ID): search "keyring" in Keychain Access.app
+- Vault file (your data): `~/Library/Application Support/keying/vault.json`
+- Keychain entry (Touch ID): search "keying" in Keychain Access.app
 - Build output: `release/`
 - Strategy doc (long-form): `STRATEGY.md`
 - This file: `TODO.md`

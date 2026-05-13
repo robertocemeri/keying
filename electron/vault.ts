@@ -268,7 +268,7 @@ export async function unlockWithKey(keyB64: string): Promise<void> {
 export async function unlockWithRecoveryKey(recoveryKeyInput: string, newPassword: string): Promise<{ ok: true }> {
   const { parseRecoveryKey } = await import("./recovery");
   const recRaw = parseRecoveryKey(recoveryKeyInput);
-  if (!recRaw) throw new Error("That doesn't look like a Keyring recovery key.");
+  if (!recRaw) throw new Error("That doesn't look like a Keying recovery key.");
   const file = await readVaultFile();
   if (file.v !== 2 || !file.rec) {
     throw new Error("This vault has no recovery key. You'll need the master password.");

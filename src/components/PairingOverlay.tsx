@@ -38,7 +38,7 @@ export default function PairingOverlay() {
                 Pairing request
               </div>
               <h2 className="text-lg font-semibold text-ink-100 leading-tight">
-                Connect <span className="text-accent-400">{state.client}</span> to Keyring
+                Connect <span className="text-accent-400">{state.client}</span> to Keying
               </h2>
               <p className="text-sm text-ink-400 leading-relaxed">
                 Enter this code in the browser extension to finish pairing.

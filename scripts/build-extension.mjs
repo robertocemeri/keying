@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Build a Chrome Web Store / Firefox Add-ons -ready zip of the extension.
-// Usage: npm run extension:zip → writes release/keyring-extension.zip
+// Usage: npm run extension:zip → writes release/keying-extension.zip
 
 import { spawnSync } from "node:child_process";
 import { mkdirSync, existsSync, rmSync } from "node:fs";
@@ -11,7 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 const extDir = join(root, "extension");
 const outDir = join(root, "release");
-const zipPath = join(outDir, "keyring-extension.zip");
+const zipPath = join(outDir, "keying-extension.zip");
 
 if (!existsSync(extDir)) {
   console.error("extension/ directory not found at", extDir);

@@ -68,7 +68,7 @@ export default function ExportModal() {
           />
           <FormatButton
             title="Bitwarden JSON"
-            description="Plaintext. Importable into Bitwarden, Keyring, or any tool that reads Bitwarden exports."
+            description="Plaintext. Importable into Bitwarden, Keying, or any tool that reads Bitwarden exports."
             onClick={() => run("bitwarden")}
             disabled={busy}
           />

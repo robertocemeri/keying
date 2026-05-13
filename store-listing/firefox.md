@@ -1,4 +1,4 @@
-# Firefox Add-ons listing — Keyring
+# Firefox Add-ons listing — Keying
 
 ## Summary
 
@@ -6,9 +6,9 @@ Autofill from a local, encrypted password manager that runs entirely on your Mac
 
 ## Description
 
-Keyring is a local-first password manager. Your vault lives on your Mac in an encrypted file. This add-on talks to the Keyring app over a loopback bridge so you can autofill credentials in Firefox without your passwords ever leaving the device.
+Keying is a local-first password manager. Your vault lives on your Mac in an encrypted file. This add-on talks to the Keying app over a loopback bridge so you can autofill credentials in Firefox without your passwords ever leaving the device.
 
-Pair this add-on with the Keyring app using a 6-digit code shown in the app once. After that, the add-on detects login forms on sites you visit and offers matching credentials, including TOTP codes, from your vault.
+Pair this add-on with the Keying app using a 6-digit code shown in the app once. After that, the add-on detects login forms on sites you visit and offers matching credentials, including TOTP codes, from your vault.
 
 ## Source code
 

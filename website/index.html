@@ -6,27 +6,27 @@
   <meta name="color-scheme" content="dark" />
   <meta name="theme-color" content="#0a0a0c" />
 
-  <title>Keyring — a local, encrypted password manager for macOS</title>
-  <meta name="description" content="Keyring is an open-source, local-first password manager for macOS. Your vault is encrypted on your device with AES-256-GCM and never leaves it. No cloud, no account, no telemetry." />
-  <link rel="canonical" href="https://keyring.app/" />
+  <title>Keying — a local, encrypted password manager for macOS</title>
+  <meta name="description" content="Keying is an open-source, local-first password manager for macOS. Your vault is encrypted on your device with AES-256-GCM and never leaves it. No cloud, no account, no telemetry." />
+  <link rel="canonical" href="https://keying.app/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://keyring.app/" />
-  <meta property="og:title" content="Keyring — a local, encrypted password manager for macOS" />
+  <meta property="og:url" content="https://keying.app/" />
+  <meta property="og:title" content="Keying — a local, encrypted password manager for macOS" />
   <meta property="og:description" content="Your passwords on your Mac. Encrypted with AES-256-GCM. Open source. No cloud, no account, no telemetry." />
-  <meta property="og:image" content="https://keyring.app/og.svg" />
+  <meta property="og:image" content="https://keying.app/og.svg" />
   <meta property="og:image:type" content="image/svg+xml" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:locale" content="en_US" />
-  <meta property="og:site_name" content="Keyring" />
+  <meta property="og:site_name" content="Keying" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Keyring — a local, encrypted password manager for macOS" />
+  <meta name="twitter:title" content="Keying — a local, encrypted password manager for macOS" />
   <meta name="twitter:description" content="Your passwords on your Mac. Encrypted with AES-256-GCM. Open source. No cloud, no account, no telemetry." />
-  <meta name="twitter:image" content="https://keyring.app/og.svg" />
+  <meta name="twitter:image" content="https://keying.app/og.svg" />
 
   <!-- Robots / discovery -->
   <meta name="robots" content="index, follow, max-image-preview:large" />
@@ -48,12 +48,12 @@
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Keyring",
+    "name": "Keying",
     "operatingSystem": "macOS 12+",
     "applicationCategory": "SecurityApplication",
     "description": "An open-source, local-first password manager for macOS. AES-256-GCM encrypted vault, no cloud, no account.",
-    "url": "https://keyring.app/",
-    "image": "https://keyring.app/og.svg",
+    "url": "https://keying.app/",
+    "image": "https://keying.app/og.svg",
     "downloadUrl": "https://github.com/robertocemeri/keying/releases",
     "softwareVersion": "0.1.0",
     "author": {
@@ -105,9 +105,9 @@
   <!-- Nav -->
   <header class="nav">
     <div class="nav__inner">
-      <a href="/" class="brand" aria-label="Keyring home">
+      <a href="/" class="brand" aria-label="Keying home">
         <span class="brand__mark" aria-hidden="true"></span>
-        <span>Keyring</span>
+        <span>Keying</span>
       </a>
       <nav class="nav__links" aria-label="Primary">
         <a href="#features">Features</a>
@@ -138,9 +138,9 @@
           </h1>
 
           <p class="hero__sub">
-            Keyring is an open-source password manager that lives entirely on your device.
+            Keying is an open-source password manager that lives entirely on your device.
             One encrypted file. AES-256-GCM. Your master password derives the key — and
-            never leaves the machine it was typed on. There is no Keyring server because
+            never leaves the machine it was typed on. There is no Keying server because
             there is nothing for one to do.
           </p>
 
@@ -166,7 +166,7 @@
           <div class="terminal">
             <div class="terminal__bar">
               <span class="dots"><span></span><span></span><span></span></span>
-              <span class="title">~/Library/Application Support/Keyring</span>
+              <span class="title">~/Library/Application Support/Keying</span>
             </div>
             <div class="terminal__body">
               <div class="terminal__line"><span class="term__prompt">$</span> <span class="term__cmd">file vault.enc</span></div>
@@ -195,12 +195,12 @@
             Every other password manager makes you trust a server you can't see, run by people you'll never meet, paid for by a subscription that resets if you stop. The whole point of a password manager is to <strong>raise the cost of stealing your data</strong> — yet the standard architecture is one breach away from leaking every credential you own.
           </p>
           <p>
-            Keyring takes the opposite bet. Your vault is <strong>a single encrypted file on your Mac</strong>. The key is derived from your master password using PBKDF2 with 600,000 iterations and immediately wraps a random data key. The plaintext only exists in process memory, only while the app is unlocked, only on the machine you typed the password into.
+            Keying takes the opposite bet. Your vault is <strong>a single encrypted file on your Mac</strong>. The key is derived from your master password using PBKDF2 with 600,000 iterations and immediately wraps a random data key. The plaintext only exists in process memory, only while the app is unlocked, only on the machine you typed the password into.
           </p>
           <p>
             There is no cloud. There is no account. There is no analytics endpoint phoning home with your usage. The browser extension talks to the app on <code class="mono dim">127.0.0.1</code>. The only outbound network request the app ever makes is a release-check against GitHub — and you can block it.
           </p>
-          <div class="manifesto__sig">— Roberto · maker of Keyring · 2026</div>
+          <div class="manifesto__sig">— Roberto · maker of Keying · 2026</div>
         </div>
       </div>
     </section>
@@ -213,7 +213,7 @@
           <h2 class="h-2" style="margin-top:18px">Small surface. Sharp tools.</h2>
         </div>
         <p>
-          Every feature pulls its weight. No "Keyring Cloud Premium." No nags. No analytics. Just the things a password manager actually has to do, executed with care.
+          Every feature pulls its weight. No "Keying Cloud Premium." No nags. No analytics. Just the things a password manager actually has to do, executed with care.
         </p>
       </div>
 
@@ -238,7 +238,7 @@
           <div class="feature__num"><span class="lime">03</span> · TOTP</div>
           <div>
             <h3 class="feature__title">Built-in 2FA codes.</h3>
-            <p class="feature__desc">Every entry can hold a TOTP secret. Keyring generates the 6-digit code locally and copies it on click — no separate authenticator app, no QR ritual.</p>
+            <p class="feature__desc">Every entry can hold a TOTP secret. Keying generates the 6-digit code locally and copies it on click — no separate authenticator app, no QR ritual.</p>
           </div>
         </article>
 
@@ -254,7 +254,7 @@
           <div class="feature__num"><span class="lime">05</span> · RECOVERY</div>
           <div>
             <h3 class="feature__title">A key you can print.</h3>
-            <p class="feature__desc">During setup Keyring generates a recovery key and asks you to print it. If you forget your master password, the recovery key resets it. Lose both, and the data is unrecoverable — by design.</p>
+            <p class="feature__desc">During setup Keying generates a recovery key and asks you to print it. If you forget your master password, the recovery key resets it. Lose both, and the data is unrecoverable — by design.</p>
           </div>
         </article>
 
@@ -278,7 +278,7 @@
         <li class="how__step">
           <div class="how__num">01</div>
           <h3>Download &amp; set a master password</h3>
-          <p>The DMG is signed and notarized. On first launch you pick a master password and Keyring prints a recovery key.</p>
+          <p>The DMG is signed and notarized. On first launch you pick a master password and Keying prints a recovery key.</p>
         </li>
         <li class="how__step">
           <div class="how__num">02</div>
@@ -288,7 +288,7 @@
         <li class="how__step">
           <div class="how__num">03</div>
           <h3>Forget the cloud</h3>
-          <p>Use Keyring. Back up the vault file when you want — same master password unlocks it on any Mac.</p>
+          <p>Use Keying. Back up the vault file when you want — same master password unlocks it on any Mac.</p>
         </li>
       </ol>
     </section>
@@ -298,9 +298,9 @@
       <div class="security__grid">
         <div class="security__copy">
           <span class="label">The honest threat model</span>
-          <h2 class="h-2">What Keyring protects.<br/>And what it doesn't.</h2>
+          <h2 class="h-2">What Keying protects.<br/>And what it doesn't.</h2>
           <p>
-            Every security product needs an honest threat model. Marketing copy that says "military-grade" is meaningless. Here's what Keyring guarantees and where it stops.
+            Every security product needs an honest threat model. Marketing copy that says "military-grade" is meaningless. Here's what Keying guarantees and where it stops.
           </p>
           <p class="mono dim" style="margin-top:24px; font-size:13px;">
             See <a href="https://github.com/robertocemeri/keying/blob/main/electron/crypto.ts" style="color:var(--lime); text-decoration:underline; text-decoration-color: rgba(163,230,53,0.3);">crypto.ts</a> for the primitives.
@@ -337,7 +337,7 @@
               <span class="prop__sign">Does not</span>
               <span class="prop__title">Replace macOS hygiene</span>
             </div>
-            <p class="prop__body">Once your vault is unlocked, the encryption key sits in process memory. A compromised macOS, a kernel-level keylogger, or someone with physical access to your unlocked Mac can defeat Keyring — same as any password manager.</p>
+            <p class="prop__body">Once your vault is unlocked, the encryption key sits in process memory. A compromised macOS, a kernel-level keylogger, or someone with physical access to your unlocked Mac can defeat Keying — same as any password manager.</p>
           </div>
 
           <div class="prop prop--no">
@@ -345,7 +345,7 @@
               <span class="prop__sign">Does not</span>
               <span class="prop__title">Recover forgotten passwords</span>
             </div>
-            <p class="prop__body">Forget both your master password <em>and</em> your recovery key, and the data is gone. There is no Keyring support to call — that's the price of zero-knowledge.</p>
+            <p class="prop__body">Forget both your master password <em>and</em> your recovery key, and the data is gone. There is no Keying support to call — that's the price of zero-knowledge.</p>
           </div>
         </div>
       </div>
@@ -395,7 +395,7 @@
 
       <div class="faq__list">
         <details class="faq__item">
-          <summary>Is Keyring really free?<span class="faq__plus" aria-hidden="true">+</span></summary>
+          <summary>Is Keying really free?<span class="faq__plus" aria-hidden="true">+</span></summary>
           <div class="faq__body">
             Yes, and forever. The whole project is MIT-licensed and the codebase has no paywall, trial, or "Pro" tier. If you want to support it, give the GitHub repo a star.
           </div>
@@ -404,35 +404,35 @@
         <details class="faq__item">
           <summary>What happens if I forget my master password?<span class="faq__plus" aria-hidden="true">+</span></summary>
           <div class="faq__body">
-            You use your recovery key — Keyring generated one for you at setup and asked you to print it. The recovery key resets the master password without re-encrypting your data. If you've lost both the master password <em>and</em> the recovery key, the vault is unrecoverable. There is no backdoor.
+            You use your recovery key — Keying generated one for you at setup and asked you to print it. The recovery key resets the master password without re-encrypting your data. If you've lost both the master password <em>and</em> the recovery key, the vault is unrecoverable. There is no backdoor.
           </div>
         </details>
 
         <details class="faq__item">
           <summary>How do I back up my vault?<span class="faq__plus" aria-hidden="true">+</span></summary>
           <div class="faq__body">
-            Settings → Backup &amp; export → Export encrypted backup. You'll get a copy of <code>vault.enc</code> that opens with the same master password on any Mac. Drop it into <code>~/Library/Application Support/Keyring/</code> to restore. For migrations to another password manager, export as Bitwarden JSON or CSV.
+            Settings → Backup &amp; export → Export encrypted backup. You'll get a copy of <code>vault.enc</code> that opens with the same master password on any Mac. Drop it into <code>~/Library/Application Support/Keying/</code> to restore. For migrations to another password manager, export as Bitwarden JSON or CSV.
           </div>
         </details>
 
         <details class="faq__item">
-          <summary>Does Keyring sync between my devices?<span class="faq__plus" aria-hidden="true">+</span></summary>
+          <summary>Does Keying sync between my devices?<span class="faq__plus" aria-hidden="true">+</span></summary>
           <div class="faq__body">
-            Not by itself — that would require a server, which Keyring doesn't have. If you want sync, put your <code>vault.enc</code> in iCloud Drive, Dropbox, or any folder that gets synced. Because the file is encrypted on disk, the sync service sees only ciphertext.
+            Not by itself — that would require a server, which Keying doesn't have. If you want sync, put your <code>vault.enc</code> in iCloud Drive, Dropbox, or any folder that gets synced. Because the file is encrypted on disk, the sync service sees only ciphertext.
           </div>
         </details>
 
         <details class="faq__item">
           <summary>Why macOS only?<span class="faq__plus" aria-hidden="true">+</span></summary>
           <div class="faq__body">
-            Keyring uses Touch ID and the macOS Keychain for the quick-unlock path. Porting to Windows/Linux is on the roadmap once macOS is fully shipped; the cross-platform pieces (vault format, crypto, browser bridge) are already platform-agnostic.
+            Keying uses Touch ID and the macOS Keychain for the quick-unlock path. Porting to Windows/Linux is on the roadmap once macOS is fully shipped; the cross-platform pieces (vault format, crypto, browser bridge) are already platform-agnostic.
           </div>
         </details>
 
         <details class="faq__item">
           <summary>How is this different from Bitwarden?<span class="faq__plus" aria-hidden="true">+</span></summary>
           <div class="faq__body">
-            Bitwarden has a server (you can self-host, but most people don't). Keyring has no server, ever — there's nothing for one to do. Bitwarden also has Premium tiers; Keyring is free and MIT-licensed. Both use strong encryption; the difference is architectural philosophy.
+            Bitwarden has a server (you can self-host, but most people don't). Keying has no server, ever — there's nothing for one to do. Bitwarden also has Premium tiers; Keying is free and MIT-licensed. Both use strong encryption; the difference is architectural philosophy.
           </div>
         </details>
 
@@ -453,7 +453,7 @@
           Take your <em>passwords</em><br/>back home.
         </h2>
         <a class="btn btn--primary" href="https://github.com/robertocemeri/keying/releases">
-          <span aria-hidden="true">↓</span> Download Keyring for macOS
+          <span aria-hidden="true">↓</span> Download Keying for macOS
         </a>
         <div class="cta__hint">Free · open source · MIT licensed · v0.1.0 · macOS 12+ · Apple Silicon &amp; Intel</div>
       </div>
@@ -465,7 +465,7 @@
       <div class="footer__col">
         <div class="footer__brand">
           <span class="brand__mark" aria-hidden="true"></span>
-          <span class="mono" style="font-size:14px;">Keyring</span>
+          <span class="mono" style="font-size:14px;">Keying</span>
         </div>
         <p class="footer__tag">A password manager that respects the meaning of "your data."</p>
       </div>

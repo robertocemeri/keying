@@ -33,7 +33,7 @@ export default function RecoveryKeyDisplay({ recoveryKey, context, onDone }: Pro
     context === "setup"
       ? "If you ever forget your master password, this is the only way back into your vault. Print it, save it offline. We can't recover it for you."
       : context === "post-migration"
-      ? "Keyring just upgraded your vault to support recovery keys. Save this somewhere safe — it's the only way back in if you forget your master password."
+      ? "Keying just upgraded your vault to support recovery keys. Save this somewhere safe — it's the only way back in if you forget your master password."
       : "Your old recovery key no longer works. Save this new one somewhere safe.";
 
   return (

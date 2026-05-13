@@ -167,7 +167,7 @@ export default function OverlayApp() {
               setSelectedIdx(0);
             }}
             onKeyDown={handleKeyDown}
-            placeholder={unlocked ? "Search Keyring…" : "Vault is locked"}
+            placeholder={unlocked ? "Search Keying…" : "Vault is locked"}
             disabled={!unlocked}
             className="flex-1 bg-transparent text-lg outline-none placeholder:text-ink-500 disabled:opacity-60"
             autoFocus
@@ -311,9 +311,9 @@ function LockedState() {
   return (
     <div className="h-full grid place-items-center px-6 text-center">
       <div className="space-y-3 max-w-sm">
-        <div className="text-sm font-medium text-ink-200">Keyring is locked</div>
+        <div className="text-sm font-medium text-ink-200">Keying is locked</div>
         <p className="text-xs text-ink-400 leading-relaxed">
-          Unlock Keyring in the main window. The overlay only works when the vault is open.
+          Unlock Keying in the main window. The overlay only works when the vault is open.
         </p>
         <button
           onClick={() => window.vault.hideOverlay()}

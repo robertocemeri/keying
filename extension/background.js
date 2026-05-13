@@ -1,4 +1,4 @@
-// Service worker: handles communication with the Keyring app over HTTP.
+// Service worker: handles communication with the Keying app over HTTP.
 // Keeps the auth token in chrome.storage.local. All credential fetching goes
 // through here so the token never lives in content scripts.
 

@@ -6,15 +6,15 @@
   <meta name="color-scheme" content="dark" />
   <meta name="theme-color" content="#0a0a0c" />
 
-  <title>Privacy — Keyring</title>
-  <meta name="description" content="Keyring sends nothing to anyone, ever. Read the full privacy policy for the local-first password manager." />
-  <link rel="canonical" href="https://keyring.app/privacy.html" />
+  <title>Privacy — Keying</title>
+  <meta name="description" content="Keying sends nothing to anyone, ever. Read the full privacy policy for the local-first password manager." />
+  <link rel="canonical" href="https://keying.app/privacy.html" />
 
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="Privacy Policy — Keyring" />
-  <meta property="og:description" content="Keyring sends nothing to anyone, ever. The full privacy policy for the local-first password manager." />
-  <meta property="og:url" content="https://keyring.app/privacy.html" />
-  <meta property="og:image" content="https://keyring.app/og.svg" />
+  <meta property="og:title" content="Privacy Policy — Keying" />
+  <meta property="og:description" content="Keying sends nothing to anyone, ever. The full privacy policy for the local-first password manager." />
+  <meta property="og:url" content="https://keying.app/privacy.html" />
+  <meta property="og:image" content="https://keying.app/og.svg" />
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -108,9 +108,9 @@
 
   <header class="nav">
     <div class="nav__inner">
-      <a href="/" class="brand" aria-label="Keyring home">
+      <a href="/" class="brand" aria-label="Keying home">
         <span class="brand__mark" aria-hidden="true"></span>
-        <span>Keyring</span>
+        <span>Keying</span>
       </a>
       <nav class="nav__links" aria-label="Primary">
         <a href="/#features">Features</a>
@@ -125,41 +125,41 @@
 
   <main id="main" class="doc">
     <span class="label">Privacy</span>
-    <h1>Keyring sends <em style="color:var(--lime); font-style: italic;">nothing</em> to anyone, ever.</h1>
+    <h1>Keying sends <em style="color:var(--lime); font-style: italic;">nothing</em> to anyone, ever.</h1>
     <div class="updated">Last updated · May 13, 2026</div>
 
     <h2>The long version</h2>
-    <p>Keyring is a local-first password manager. Every byte of your vault — passwords, usernames, URLs, notes, TOTP secrets — lives on your Mac in an encrypted file at <code>~/Library/Application Support/Keyring/vault.enc</code>.</p>
-    <p>The author of Keyring (and any party other than you) cannot read your data because:</p>
+    <p>Keying is a local-first password manager. Every byte of your vault — passwords, usernames, URLs, notes, TOTP secrets — lives on your Mac in an encrypted file at <code>~/Library/Application Support/Keying/vault.enc</code>.</p>
+    <p>The author of Keying (and any party other than you) cannot read your data because:</p>
     <ul>
       <li>The vault is encrypted with <strong>AES-256-GCM</strong> under a key derived from your master password using <strong>PBKDF2</strong> (600,000 iterations, SHA-256).</li>
-      <li>The encryption happens entirely on your device, in the Keyring app.</li>
-      <li>Keyring has no server. There is no "Keyring account."</li>
+      <li>The encryption happens entirely on your device, in the Keying app.</li>
+      <li>Keying has no server. There is no "Keying account."</li>
     </ul>
 
-    <h2>What Keyring does NOT do</h2>
+    <h2>What Keying does NOT do</h2>
     <ul>
-      <li>Keyring does <strong>not</strong> transmit your vault, your master password, your recovery key, or any derived key to any server.</li>
-      <li>Keyring does <strong>not</strong> collect analytics, telemetry, or crash reports.</li>
-      <li>Keyring does <strong>not</strong> report which sites you visit, log in to, or save passwords for.</li>
-      <li>Keyring does <strong>not</strong> include any third-party SDKs, trackers, or advertising networks.</li>
+      <li>Keying does <strong>not</strong> transmit your vault, your master password, your recovery key, or any derived key to any server.</li>
+      <li>Keying does <strong>not</strong> collect analytics, telemetry, or crash reports.</li>
+      <li>Keying does <strong>not</strong> report which sites you visit, log in to, or save passwords for.</li>
+      <li>Keying does <strong>not</strong> include any third-party SDKs, trackers, or advertising networks.</li>
     </ul>
 
-    <h2>What network access Keyring needs</h2>
-    <p>Keyring makes network requests in only two situations:</p>
+    <h2>What network access Keying needs</h2>
+    <p>Keying makes network requests in only two situations:</p>
     <h3>1. Auto-update check.</h3>
     <p>On startup the app contacts <code>api.github.com</code> and <code>objects.githubusercontent.com</code> to check whether a newer release is available on the public GitHub repository <code>robertocemeri/keying</code>. No identifying information is sent beyond what GitHub records for any public HTTP request (IP address, User-Agent). You can disable updates by blocking outbound traffic to those hosts.</p>
     <h3>2. Browser extension bridge.</h3>
-    <p>Keyring runs a local HTTP server on <code>127.0.0.1:17321</code> (your computer's own loopback interface) so the Keyring browser extension can request credentials. This server is bound to <code>127.0.0.1</code> only — nothing outside your machine can reach it, and every request requires a per-browser token paired interactively.</p>
+    <p>Keying runs a local HTTP server on <code>127.0.0.1:17321</code> (your computer's own loopback interface) so the Keying browser extension can request credentials. This server is bound to <code>127.0.0.1</code> only — nothing outside your machine can reach it, and every request requires a per-browser token paired interactively.</p>
 
     <h2>Keychain access</h2>
-    <p>If you enable Touch ID quick-unlock, Keyring stores the vault encryption key in the macOS Keychain under the service name <code>Keyring</code>. The key never leaves the Keychain except into Keyring's own process memory while the vault is unlocked.</p>
+    <p>If you enable Touch ID quick-unlock, Keying stores the vault encryption key in the macOS Keychain under the service name <code>Keying</code>. The key never leaves the Keychain except into Keying's own process memory while the vault is unlocked.</p>
 
     <h2>Browser extension</h2>
-    <p>The Keyring browser extension stores a single 32-byte random pairing token in <code>chrome.storage.local</code> (or the Firefox equivalent). It contacts only <code>http://127.0.0.1:17321</code> — your own machine. It does not contact any remote server.</p>
+    <p>The Keying browser extension stores a single 32-byte random pairing token in <code>chrome.storage.local</code> (or the Firefox equivalent). It contacts only <code>http://127.0.0.1:17321</code> — your own machine. It does not contact any remote server.</p>
 
     <h2>What if I forget my master password?</h2>
-    <p>You use your recovery key, which Keyring generates during setup and asks you to print. If you've lost both, the data is unrecoverable — by design.</p>
+    <p>You use your recovery key, which Keying generates during setup and asks you to print. If you've lost both, the data is unrecoverable — by design.</p>
 
     <h2>Changes to this policy</h2>
     <p>If this policy ever changes substantively, the change will be committed to the public repository and called out in the release notes. There is no email list to be on.</p>
@@ -167,7 +167,7 @@
     <h2>Contact</h2>
     <p>Open an issue at <a href="https://github.com/robertocemeri/keying/issues">github.com/robertocemeri/keying/issues</a>.</p>
 
-    <a href="/" class="back">← Back to Keyring</a>
+    <a href="/" class="back">← Back to Keying</a>
   </main>
 </body>
 </html>

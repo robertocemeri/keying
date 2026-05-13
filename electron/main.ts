@@ -85,7 +85,7 @@ function currentAutoLockMs(): number | null {
   return minutes * 60 * 1000;
 }
 
-app.setName("Keyring");
+app.setName("Keying");
 
 let mainWindow: BrowserWindow | null = null;
 let autoLockTimer: NodeJS.Timeout | null = null;
@@ -132,7 +132,7 @@ function createWindow() {
     backgroundColor: "#0a0a0c",
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 14, y: 18 },
-    title: "Keyring",
+    title: "Keying",
     show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -162,7 +162,7 @@ function createWindow() {
 app.whenReady().then(async () => {
   // Dock icon: in dev, scripts/setup-dev-icon.mjs swaps the Electron bundle's
   // icon for ours before launch, so macOS uses it natively (no runtime
-  // override needed). In a packaged build the bundle is Keyring.app and the
+  // override needed). In a packaged build the bundle is Keying.app and the
   // .icns is set via electron-builder's mac.icon. Either way, no setIcon
   // call here.
 
@@ -322,7 +322,7 @@ ipcMain.handle(
 ipcMain.handle("vault:unlockTouchID", async () => {
   if (!isTouchIDAvailable()) throw new Error("Touch ID is not available");
   if (!(await hasStoredKey())) throw new Error("No saved key for Touch ID");
-  const ok = await promptTouchID("unlock your Keyring");
+  const ok = await promptTouchID("unlock your Keying");
   if (!ok) throw new Error("Touch ID was cancelled");
   const keyB64 = await getStoredKey();
   if (!keyB64) throw new Error("No saved key for Touch ID");
@@ -483,7 +483,7 @@ ipcMain.handle("vault:exportCsv", async () => {
   const stamp = new Date().toISOString().slice(0, 10);
   const res = await dialog.showSaveDialog({
     title: "Export vault to CSV",
-    defaultPath: `keyring-export-${stamp}.csv`,
+    defaultPath: `keying-export-${stamp}.csv`,
     filters: [{ name: "CSV", extensions: ["csv"] }],
   });
   if (res.canceled || !res.filePath) return { ok: false };
@@ -499,7 +499,7 @@ ipcMain.handle("vault:exportBitwardenJson", async () => {
   const stamp = new Date().toISOString().slice(0, 10);
   const res = await dialog.showSaveDialog({
     title: "Export vault to Bitwarden JSON",
-    defaultPath: `keyring-export-${stamp}.json`,
+    defaultPath: `keying-export-${stamp}.json`,
     filters: [{ name: "JSON", extensions: ["json"] }],
   });
   if (res.canceled || !res.filePath) return { ok: false };
@@ -512,7 +512,7 @@ ipcMain.handle("vault:exportBackup", async () => {
   const stamp = new Date().toISOString().slice(0, 10);
   const res = await dialog.showSaveDialog({
     title: "Save encrypted backup",
-    defaultPath: `keyring-backup-${stamp}.enc`,
+    defaultPath: `keying-backup-${stamp}.enc`,
     filters: [{ name: "Encrypted backup", extensions: ["enc"] }],
   });
   if (res.canceled || !res.filePath) return { ok: false };
@@ -551,7 +551,7 @@ function renderRecoveryKeyHtml(recoveryKey: string): string {
   const stamp = new Date().toISOString().slice(0, 10);
   const vaultLoc = getVaultPath();
   return `<!doctype html>
-<html><head><meta charset="utf-8"><title>Keyring Recovery Key</title>
+<html><head><meta charset="utf-8"><title>Keying Recovery Key</title>
 <style>
   @page { size: letter; margin: 0.75in; }
   * { box-sizing: border-box; }
@@ -575,7 +575,7 @@ function renderRecoveryKeyHtml(recoveryKey: string): string {
   hr { border: none; border-top: 1px solid #e3e3e7; margin: 22px 0; }
 </style></head>
 <body>
-  <h1>Keyring — Recovery Key</h1>
+  <h1>Keying — Recovery Key</h1>
   <div class="meta">Generated ${stamp} · vault stored at <code>${vaultLoc}</code></div>
 
   <p>If you forget your master password, this is the only way back into your vault. Keep it somewhere safe — a fireproof box, a safe deposit box, or with a trusted person.</p>
@@ -588,8 +588,8 @@ function renderRecoveryKeyHtml(recoveryKey: string): string {
 
   <hr/>
 
-  <p class="small">To use this key: open Keyring → on the unlock screen tap "Forgot password? Use recovery key" → paste this key → choose a new master password.</p>
-  <p class="small">Keyring will never ask for this key over email or chat. There is no Keyring support that can help you recover your data — losing both the master password and this key means the data is unrecoverable.</p>
+  <p class="small">To use this key: open Keying → on the unlock screen tap "Forgot password? Use recovery key" → paste this key → choose a new master password.</p>
+  <p class="small">Keying will never ask for this key over email or chat. There is no Keying support that can help you recover your data — losing both the master password and this key means the data is unrecoverable.</p>
 </body></html>`;
 }
 

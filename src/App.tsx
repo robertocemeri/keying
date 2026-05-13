@@ -74,7 +74,7 @@ export default function App() {
               }}
             />
           </span>
-          <span>Keyring</span>
+          <span>Keying</span>
         </div>
       </div>
       <div className="flex-1 min-h-0">
@@ -98,7 +98,7 @@ export default function App() {
       </div>
       <PairingOverlay />
       <ImportModal
-        onImported={() => window.dispatchEvent(new CustomEvent("keyring:import-complete"))}
+        onImported={() => window.dispatchEvent(new CustomEvent("keying:import-complete"))}
       />
       <ExportModal />
       <SettingsDrawer

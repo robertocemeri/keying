@@ -1,7 +1,7 @@
 import keytar from "keytar";
 import { systemPreferences } from "electron";
 
-const SERVICE = "Keyring";
+const SERVICE = "Keying";
 const ACCOUNT = "vault-key";
 
 export async function hasStoredKey(): Promise<boolean> {

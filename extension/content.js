@@ -125,7 +125,7 @@
   async function fillWith(item, pair) {
     const res = await chrome.runtime.sendMessage({ type: "credentials", id: item.id });
     if (!res?.ok) {
-      if (res?.status === 423) toast("Keyring is locked.");
+      if (res?.status === 423) toast("Keying is locked.");
       else if (res?.status === 403) toast("Autofill is disabled for this entry.");
       else toast("Couldn't fetch credentials.");
       return;
@@ -152,7 +152,7 @@
     } catch {
       /* ignore */
     }
-    toast("Filled from Keyring");
+    toast("Filled from Keying");
   }
 
   let toastEl = null;
@@ -196,7 +196,7 @@
         if (chip) removeChip();
         return;
       }
-      const c = buildChip("Fill from Keyring", matches.length);
+      const c = buildChip("Fill from Keying", matches.length);
       currentPw = pair.pw;
       currentAnchor = anchor;
       positionChipNear(anchor);
@@ -280,7 +280,7 @@
     totpChip = document.createElement("div");
     totpChip.className = "__pv-chip __pv-chip-totp";
     totpChip.setAttribute("role", "button");
-    totpChip.setAttribute("aria-label", "Fill 2FA code from Keyring");
+    totpChip.setAttribute("aria-label", "Fill 2FA code from Keying");
     totpChip.tabIndex = 0;
     totpChip.innerHTML = `
       <span class="__pv-icon" aria-hidden="true">🔑</span>
@@ -345,7 +345,7 @@
     c.addEventListener("click", async () => {
       const r = await chrome.runtime.sendMessage({ type: "totp", id: entryId });
       if (!r?.ok) {
-        if (r?.status === 423) toast("Keyring is locked.");
+        if (r?.status === 423) toast("Keying is locked.");
         else if (r?.status === 404) toast("No 2FA code on that entry.");
         else if (r?.status === 403) toast("Autofill is disabled for this entry.");
         else toast("Couldn't fetch 2FA code.");
@@ -535,7 +535,7 @@
     textBox.className = "__pv-save-text";
     const line1 = document.createElement("div");
     line1.className = "__pv-save-title";
-    line1.textContent = "Save this login to Keyring?";
+    line1.textContent = "Save this login to Keying?";
     const line2 = document.createElement("div");
     line2.className = "__pv-save-sub";
     line2.textContent = (pending.username || "(no username)") + " · " + HOST;
@@ -594,10 +594,10 @@
         /* ignore */
       }
       cleanup();
-      if (r?.ok) toast("Saved to Keyring");
-      else if (r?.error === "duplicate") toast("Already in Keyring");
-      else if (r?.status === 423) toast("Keyring is locked — can't save");
-      else toast("Couldn't save to Keyring");
+      if (r?.ok) toast("Saved to Keying");
+      else if (r?.error === "duplicate") toast("Already in Keying");
+      else if (r?.status === 423) toast("Keying is locked — can't save");
+      else toast("Couldn't save to Keying");
     });
 
     setTimeout(() => {

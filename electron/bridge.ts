@@ -161,7 +161,7 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse): Prom
     sendJson(res, 200, {
       ok: true,
       unlocked: isUnlocked(),
-      app: "Keyring",
+      app: "Keying",
       v: 1,
     });
     return;

@@ -1,9 +1,9 @@
-// Replaces the Electron.app bundle's icon with Keyring's so the macOS Dock
+// Replaces the Electron.app bundle's icon with Keying's so the macOS Dock
 // shows the right icon in dev mode. `app.dock.setIcon()` is a runtime override
 // that macOS resyncs away at unpredictable moments; swapping the actual
 // bundle resource is the only way to make it stick.
 //
-// Idempotent: skips work if the bundle icon is already Keyring's. Safe to run
+// Idempotent: skips work if the bundle icon is already Keying's. Safe to run
 // repeatedly. Re-run after `npm install` if needed (the dependency reinstalls
 // Electron's original icon).
 

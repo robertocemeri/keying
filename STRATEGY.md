@@ -1,6 +1,6 @@
-# Keyring — Production Readiness Strategy
+# Keying — Production Readiness Strategy
 
-This is the playbook for getting Keyring from "private demo" to "strangers can install it and trust it."
+This is the playbook for getting Keying from "private demo" to "strangers can install it and trust it."
 Everything that needs your action — Apple developer credentials, store submissions, hosting — is flagged at the end.
 
 ---
@@ -31,7 +31,7 @@ Everything that needs your action — Apple developer credentials, store submiss
 1. Get your **Developer ID Application** certificate from `developer.apple.com/account` → Certificates → "+" → Developer ID Application. Download, double-click to install into the login Keychain.
 2. Export it to a `.p12` (Keychain Access → right-click cert → Export):
    - Pick a strong passphrase, save the file somewhere safe (you'll need it on every build machine).
-3. Generate an **app-specific password** for notarization at `appleid.apple.com` → Sign-In and Security → App-Specific Passwords. Label it "Keyring notarization."
+3. Generate an **app-specific password** for notarization at `appleid.apple.com` → Sign-In and Security → App-Specific Passwords. Label it "Keying notarization."
 4. Find your **Team ID** at `developer.apple.com/account` → Membership.
 5. Edit `package.json` `build.mac.notarize.teamId` to your real Team ID. (Or pass via env — see below.)
 6. Build with:
@@ -45,12 +45,12 @@ export APPLE_TEAM_ID="ABCDE12345"
 npm run electron:build
 ```
 
-The first notarized build takes 5–15 minutes (Apple's queue). After: `release/Keyring-0.x.x.dmg` is signed, notarized, stapled.
+The first notarized build takes 5–15 minutes (Apple's queue). After: `release/Keying-0.x.x.dmg` is signed, notarized, stapled.
 
 Verify with:
 ```bash
-spctl --assess -vvv release/Keyring-0.x.x-arm64.dmg
-codesign --verify --deep --strict --verbose=2 release/mac-arm64/Keyring.app
+spctl --assess -vvv release/Keying-0.x.x-arm64.dmg
+codesign --verify --deep --strict --verbose=2 release/mac-arm64/Keying.app
 ```
 
 ---
@@ -62,7 +62,7 @@ codesign --verify --deep --strict --verbose=2 release/mac-arm64/Keyring.app
 **What's done:**
 - `electron-updater` dep added.
 - `electron/updater.ts` wires `autoUpdater.checkForUpdatesAndNotify()` on startup, plus a manual "Check for updates" menu item.
-- `package.json` `build.publish` configured for GitHub Releases (provider: `github`, owner: `robertocemeri`, repo: `keyring`).
+- `package.json` `build.publish` configured for GitHub Releases (provider: `github`, owner: `robertocemeri`, repo: `keying`).
 - Renderer UI in Settings drawer shows the current version and a "Check now" button.
 
 **What you need to do (eventually):**
@@ -80,7 +80,7 @@ codesign --verify --deep --strict --verbose=2 release/mac-arm64/Keyring.app
 CSV export + Bitwarden JSON export wired in.
 - New IPC: `vault:exportCsv`, `vault:exportBitwardenJson`.
 - New menu item: **File → Export…** with format picker.
-- Mirrors the import schema exactly (round-trips Keyring → Keyring without loss).
+- Mirrors the import schema exactly (round-trips Keying → Keying without loss).
 - TOTP secrets export as raw base32 (matches what Bitwarden/1Password CSVs do).
 
 ---
@@ -134,14 +134,14 @@ This is the standard pattern (1Password Secret Key, Bitwarden Recovery Code).
 **What's done (✅):**
 - `extension/manifest.json` cleaned up: removed `<all_urls>` host permission (we only need `127.0.0.1:17321`).
 - `extension/manifest.json` adds proper `homepage_url`, `author`, store description.
-- Build script: `npm run extension:zip` packages `extension/` into `release/keyring-extension.zip` ready for upload.
+- Build script: `npm run extension:zip` packages `extension/` into `release/keying-extension.zip` ready for upload.
 - `store-listing/` directory with: short description, long description, screenshots README, permission justifications.
 
 **What you need to do:**
 
 **Chrome Web Store ($5 one-time):**
 1. `chrome.google.com/webstore/devconsole` → pay the $5 registration fee.
-2. Click "Add new item" → upload `release/keyring-extension.zip`.
+2. Click "Add new item" → upload `release/keying-extension.zip`.
 3. Paste copy from `store-listing/chrome.md`.
 4. Upload 5 screenshots (1280×800 or 640×400). Templates are at `store-listing/screenshots/`.
 5. Submit. First review = 2-7 business days.
@@ -157,7 +157,7 @@ This is the standard pattern (1Password Secret Key, Bitwarden Recovery Code).
 ## 9. License + privacy policy ✅ Done
 
 - `LICENSE` — MIT.
-- `PRIVACY.md` — one-page, plain English. Headline: "Keyring sends nothing to anyone, ever."
+- `PRIVACY.md` — one-page, plain English. Headline: "Keying sends nothing to anyone, ever."
 - Both linked from the README and the landing page.
 
 ---
@@ -186,9 +186,9 @@ This is the standard pattern (1Password Secret Key, Bitwarden Recovery Code).
 - **Hosting:** static — drop on GitHub Pages, Cloudflare Pages, or Vercel.
 
 **To go live:**
-- Easiest: GitHub Pages — `Settings → Pages → Source: website/` on the keyring repo, or move the contents to a `gh-pages` branch.
-- Then set up a custom domain (`keyring.app` / `getkeyring.com` / whatever you grab) — pointing to `robertocemeri.github.io`.
-- I left placeholder canonical URLs as `https://keyring.app` — search-and-replace once you've picked a domain.
+- Easiest: GitHub Pages — `Settings → Pages → Source: website/` on the keying repo, or move the contents to a `gh-pages` branch.
+- Then set up a custom domain (`keying.app` / `getkeying.com` / whatever you grab) — pointing to `robertocemeri.github.io`.
+- I left placeholder canonical URLs as `https://keying.app` — search-and-replace once you've picked a domain.
 
 ---
 
@@ -198,7 +198,7 @@ This is the standard pattern (1Password Secret Key, Bitwarden Recovery Code).
    - Apple Developer Program ($99/year) — you said you have this.
    - Chrome Web Store ($5 one-time, optional but recommended).
 2. **Provide signing credentials** (see section 1 above).
-3. **Pick a domain** and search/replace `https://keyring.app` in the website.
+3. **Pick a domain** and search/replace `https://keying.app` in the website.
 4. **Take screenshots** for the Chrome Web Store listing — there are placeholder slots in `store-listing/screenshots/`.
 5. **Tag `v0.1.0`** in git and let electron-builder publish the first signed DMG to a GitHub release.
 

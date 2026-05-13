@@ -503,7 +503,7 @@ function BrowsersSection() {
         <div className="text-sm text-ink-500">Loading…</div>
       ) : clients.length === 0 ? (
         <div className="text-sm text-ink-400 py-4 text-center">
-          No browsers paired yet. Install the Keyring extension and use its "Pair with app" button.
+          No browsers paired yet. Install the Keying extension and use its "Pair with app" button.
         </div>
       ) : (
         <>
@@ -558,7 +558,7 @@ function BackupSection() {
     <>
       <Card
         title="Encrypted backup"
-        description="A copy of vault.enc. The same master password (or recovery key) unlocks it on any Mac. Drop it back into Keyring's Application Support directory to restore."
+        description="A copy of vault.enc. The same master password (or recovery key) unlocks it on any Mac. Drop it back into Keying's Application Support directory to restore."
       >
         <button
           onClick={exportBackup}
@@ -643,7 +643,7 @@ function AboutSection() {
 
   return (
     <>
-      <Card title="Updates" description="Keyring checks for new versions automatically. You can also check manually.">
+      <Card title="Updates" description="Keying checks for new versions automatically. You can also check manually.">
         <div className="text-sm text-ink-300">{statusLabel}</div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -665,7 +665,7 @@ function AboutSection() {
       </Card>
 
       <Card title="Version">
-        <div className="text-sm text-ink-200">Keyring v{version}</div>
+        <div className="text-sm text-ink-200">Keying v{version}</div>
         <div className="text-xs text-ink-500">
           Local, encrypted, open source. No cloud, no telemetry.
         </div>

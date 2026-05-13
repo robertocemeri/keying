@@ -114,7 +114,7 @@ export default function UnlockScreen({
             </div>
             <h1 className="text-3xl font-semibold tracking-tight">Use your recovery key.</h1>
             <p className="text-sm text-ink-400 leading-relaxed">
-              Paste the 8-group recovery key you saved when you set up Keyring. You'll set a new master password right after.
+              Paste the 8-group recovery key you saved when you set up Keying. You'll set a new master password right after.
             </p>
           </header>
 
@@ -193,7 +193,7 @@ export default function UnlockScreen({
         <header className="space-y-2">
           <div className="inline-flex items-center gap-2 text-accent-400 text-xs tracking-widest uppercase">
             <span className="h-1.5 w-1.5 rounded-full bg-accent-400" />
-            Keyring locked
+            Keying locked
           </div>
           <h1 className="text-3xl font-semibold tracking-tight">Welcome back.</h1>
         </header>

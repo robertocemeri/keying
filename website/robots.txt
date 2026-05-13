@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://keyring.app/sitemap.xml
+Sitemap: https://keying.app/sitemap.xml

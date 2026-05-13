@@ -1,8 +1,8 @@
 {
-  "name": "keyring",
+  "name": "keying",
   "private": true,
   "version": "0.1.0",
-  "description": "Keyring — a local, encrypted password manager for macOS",
+  "description": "Keying — a local, encrypted password manager for macOS",
   "main": "dist-electron/main.js",
   "homepage": "https://github.com/robertocemeri/keying",
   "author": {
@@ -21,8 +21,8 @@
     "release": "dotenv -e .env -- bash -c 'tsc -p tsconfig.electron.json && vite build && electron-builder --mac --publish always'"
   },
   "build": {
-    "appId": "com.cemeri.keyring",
-    "productName": "Keyring",
+    "appId": "com.cemeri.keying",
+    "productName": "Keying",
     "directories": {
       "output": "release",
       "buildResources": "build"

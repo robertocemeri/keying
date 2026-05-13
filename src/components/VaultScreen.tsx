@@ -58,10 +58,10 @@ export default function VaultScreen({
       setAutofillPaused(!!g.autofillDisabled);
     });
     const onImport = () => reload();
-    window.addEventListener("keyring:import-complete", onImport);
+    window.addEventListener("keying:import-complete", onImport);
     return () => {
       off();
-      window.removeEventListener("keyring:import-complete", onImport);
+      window.removeEventListener("keying:import-complete", onImport);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

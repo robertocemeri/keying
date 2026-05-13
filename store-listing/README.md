@@ -1,6 +1,6 @@
 # Store listing assets
 
-This directory holds everything you need to submit the Keyring browser extension to a store.
+This directory holds everything you need to submit the Keying browser extension to a store.
 
 ## Files
 
@@ -16,7 +16,7 @@ From the repo root:
 npm run extension:zip
 ```
 
-This produces `release/keyring-extension.zip` — upload that file to both stores.
+This produces `release/keying-extension.zip` — upload that file to both stores.
 
 ## Screenshots you still need to take
 
@@ -25,7 +25,7 @@ Chrome wants at least 1, allows up to 5. **1280×800 or 640×400**, PNG or JPEG.
 Recommended shots:
 
 1. The autofill prompt on a real login page (e.g., github.com/login).
-2. The extension popup showing "Paired with Keyring" + matched credentials.
+2. The extension popup showing "Paired with Keying" + matched credentials.
 3. The pairing flow — the 6-digit code visible in the desktop app and the extension popup side-by-side.
 4. The desktop app's vault screen.
 5. The recovery key print preview (proves it's serious about offline-first).
@@ -43,7 +43,7 @@ I haven't generated these — the design is dark with acid green (`#84cc16`), se
 ## Submission checklist
 
 - [ ] Pay $5 Chrome Web Store registration fee
-- [ ] Upload `keyring-extension.zip`
+- [ ] Upload `keying-extension.zip`
 - [ ] Paste copy from `chrome.md`
 - [ ] Upload screenshots
 - [ ] Paste each "permission justification" verbatim into the Web Store form

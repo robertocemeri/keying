@@ -1,4 +1,4 @@
-# Keyring
+# Keying
 
 A local, encrypted password manager for macOS. No cloud. No account. No telemetry. Your vault lives on your Mac in a single encrypted file and never leaves.
 
@@ -14,7 +14,7 @@ A local, encrypted password manager for macOS. No cloud. No account. No telemetr
 
 Because the existing ones either (a) keep your vault on their servers, (b) charge a subscription for what is fundamentally a local-first problem, or (c) are unmaintained.
 
-Keyring is a 100% local password manager with a small, auditable codebase and a companion browser extension that talks to it over loopback. The trust model fits on one page: encrypt the file with a key derived from your master password, and don't talk to anyone but yourself.
+Keying is a 100% local password manager with a small, auditable codebase and a companion browser extension that talks to it over loopback. The trust model fits on one page: encrypt the file with a key derived from your master password, and don't talk to anyone but yourself.
 
 ## Features
 
@@ -31,19 +31,19 @@ Keyring is a 100% local password manager with a small, auditable codebase and a 
 
 ## Install
 
-Download the latest signed DMG from the [Releases page](https://github.com/robertocemeri/keying/releases). Open it, drag Keyring to Applications, launch.
+Download the latest signed DMG from the [Releases page](https://github.com/robertocemeri/keying/releases). Open it, drag Keying to Applications, launch.
 
 Install the browser extension from the Chrome Web Store (link will be added once approved) or Firefox Add-ons (ditto), or load `extension/` unpacked while developing.
 
 ## Security model
 
-What Keyring guarantees:
+What Keying guarantees:
 
 - An attacker who steals the encrypted vault file cannot read it without your master password or recovery key. PBKDF2 with 600k iterations makes brute-force impractical on consumer hardware.
-- The Keyring app and extension never make network requests to any server we run. The only outbound requests are auto-update checks to `api.github.com`.
+- The Keying app and extension never make network requests to any server we run. The only outbound requests are auto-update checks to `api.github.com`.
 - The bridge between the app and browser extension is on `127.0.0.1` only, requires a per-browser token, and the pairing flow requires you to confirm a 6-digit code in the app before any token is issued.
 
-What Keyring does NOT protect against:
+What Keying does NOT protect against:
 
 - A compromise of macOS itself (the encryption key sits in process memory while the vault is unlocked).
 - A keylogger that captures your master password as you type it.
@@ -97,12 +97,12 @@ npm run extension:zip
 
 ## Backup and recovery
 
-- **Recommended:** export an encrypted backup periodically (Settings → Backup & export → Export encrypted backup). The same master password unlocks it on any Mac. Drop it into `~/Library/Application Support/Keyring/vault.enc` to restore.
+- **Recommended:** export an encrypted backup periodically (Settings → Backup & export → Export encrypted backup). The same master password unlocks it on any Mac. Drop it into `~/Library/Application Support/Keying/vault.enc` to restore.
 - **Recovery key:** generated once at setup, prompted to print. Without it (and your master password), losing the master password means losing the data.
 
 ## Privacy
 
-See [PRIVACY.md](./PRIVACY.md). Short version: Keyring sends nothing to anyone, ever.
+See [PRIVACY.md](./PRIVACY.md). Short version: Keying sends nothing to anyone, ever.
 
 ## License
 

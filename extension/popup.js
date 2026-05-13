@@ -21,8 +21,8 @@ async function refresh() {
   if (!s?.reachable) {
     setPill("Offline", "err");
     show("view-status");
-    $("status-title").textContent = "Keyring app not running";
-    $("status-detail").textContent = "Open the Keyring app on your Mac, then try again.";
+    $("status-title").textContent = "Keying app not running";
+    $("status-detail").textContent = "Open the Keying app on your Mac, then try again.";
     $("btn-pair").hidden = true;
     $("btn-retry").hidden = false;
     return;
@@ -33,7 +33,7 @@ async function refresh() {
     setPill("Setup", "warn");
     show("view-status");
     $("status-title").textContent = "Not paired yet";
-    $("status-detail").textContent = "Pair this browser with Keyring to start autofilling.";
+    $("status-detail").textContent = "Pair this browser with Keying to start autofilling.";
     $("btn-pair").hidden = false;
     $("btn-retry").hidden = true;
     return;
@@ -42,9 +42,9 @@ async function refresh() {
   if (!s.unlocked) {
     setPill("Locked", "warn");
     show("view-status");
-    $("status-title").textContent = "Keyring is locked";
+    $("status-title").textContent = "Keying is locked";
     $("status-detail").textContent =
-      "Unlock Keyring on your Mac (Touch ID or master password), then reopen this popup.";
+      "Unlock Keying on your Mac (Touch ID or master password), then reopen this popup.";
     $("btn-pair").hidden = true;
     $("btn-retry").hidden = false;
     return;
@@ -86,12 +86,12 @@ async function refresh() {
     $("no-matches").hidden = false;
     if (q?.status === 423) {
       setPill("Locked", "warn");
-      $("no-matches").textContent = "Keyring is locked. Unlock it in the app.";
+      $("no-matches").textContent = "Keying is locked. Unlock it in the app.";
     } else if (q?.status === 401) {
       $("no-matches").textContent =
         "Pairing not recognized. Click 'Unpair this browser' below, then pair again.";
     } else if (typeof q?.status !== "number") {
-      $("no-matches").textContent = "Couldn't reach Keyring. Is the app running?";
+      $("no-matches").textContent = "Couldn't reach Keying. Is the app running?";
     } else {
       $("no-matches").textContent = "Couldn't fetch matches (HTTP " + q.status + ").";
     }
@@ -120,7 +120,7 @@ async function refresh() {
       const r = await send({ type: "credentials", id: m.id });
       if (!r?.ok) {
         const msg =
-          r?.status === 423 ? "Keyring is locked." :
+          r?.status === 423 ? "Keying is locked." :
           r?.status === 403 ? "Autofill is disabled for this entry." :
           "Couldn't fetch credentials.";
         alert(msg);
@@ -144,7 +144,7 @@ async function refresh() {
         ev.stopPropagation();
         const r = await send({ type: "totp", id: m.id });
         if (!r?.ok) {
-          alert(r?.status === 423 ? "Keyring is locked." : "Couldn't fetch code.");
+          alert(r?.status === 423 ? "Keying is locked." : "Couldn't fetch code.");
           return;
         }
         await navigator.clipboard.writeText(r.code);
@@ -208,7 +208,7 @@ $("btn-verify").addEventListener("click", async () => {
   const code = ($("code").value || "").trim();
   if (!/^\d{6}$/.test(code)) {
     $("pair-err").hidden = false;
-    $("pair-err").textContent = "Enter the 6-digit code from the Keyring app.";
+    $("pair-err").textContent = "Enter the 6-digit code from the Keying app.";
     return;
   }
   const r = await send({ type: "pair-verify", code });

@@ -35,7 +35,7 @@ export function createOverlay(): void {
     skipTaskbar: true,
     hasShadow: true,
     backgroundColor: "#0a0a0c",
-    title: "Keyring Quick Search",
+    title: "Keying Quick Search",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
