@@ -155,13 +155,17 @@ export async function handleTranslocationEarly(): Promise<boolean> {
   if (choice.response !== 0) return false;
 
   // Spawn `open -n -a /Applications/Keying.app` detached so it survives this
-  // process quitting. `-n` forces a new instance; without it, macOS may
-  // foreground the current (translocated) process instead.
+  // process quitting. The 1.5s sleep gives this (translocated) process time
+  // to fully exit and release the single-instance lock + bridge port —
+  // otherwise the new instance would see them held and quit on lock-fail.
+  // `-n` forces a new instance; without it, macOS may foreground the current
+  // (translocated) process instead.
   try {
-    const child = spawn("/usr/bin/open", ["-n", "-a", canonical], {
-      detached: true,
-      stdio: "ignore",
-    });
+    const child = spawn(
+      "/bin/sh",
+      ["-c", `sleep 1.5 && /usr/bin/open -n -a ${JSON.stringify(canonical)}`],
+      { detached: true, stdio: "ignore" }
+    );
     child.unref();
   } catch (e) {
     await dialog.showMessageBox({

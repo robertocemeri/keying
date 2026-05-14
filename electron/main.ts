@@ -91,6 +91,16 @@ function currentAutoLockMs(): number | null {
 
 app.setName("Keying");
 
+// Refuse to run a second copy of Keying. Without this, a stale translocated
+// process plus a freshly-launched /Applications copy both stay alive long
+// enough to show two Dock icons and fight over the bridge port. The second
+// instance just exits; the first one focuses its existing window via the
+// "second-instance" event below.
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  app.quit();
+}
+
 let mainWindow: BrowserWindow | null = null;
 let autoLockTimer: NodeJS.Timeout | null = null;
 
@@ -293,6 +303,16 @@ app.whenReady().then(async () => {
       mainWindow.focus();
     } else if (BrowserWindow.getAllWindows().filter((w) => !w.isDestroyed() && !w.webContents.getURL().includes("/overlay")).length === 0) {
       createWindow();
+    }
+  });
+
+  // Second-instance attempts (e.g., user double-clicks Dock shortcut while
+  // app is already running) should focus the existing window instead.
+  app.on("second-instance", () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
     }
   });
 

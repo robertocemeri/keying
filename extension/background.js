@@ -156,6 +156,24 @@ async function generate(length) {
   return { ok: false, error: body.error || "generate-failed", status };
 }
 
+// chrome.storage.session is gated to TRUSTED_CONTEXTS by default and we grant
+// content-script access via setAccessLevel above — but when the SW idles out
+// and restarts, a content-script set() can race the setAccessLevel call. To
+// eliminate that race, route all session storage I/O through the SW (these
+// handlers always run privileged). Content scripts call us via sendMessage.
+async function sessionGet(key) {
+  const data = await chrome.storage.session.get(key);
+  return { ok: true, value: data[key] ?? null };
+}
+async function sessionSet(key, value) {
+  await chrome.storage.session.set({ [key]: value });
+  return { ok: true };
+}
+async function sessionRemove(key) {
+  await chrome.storage.session.remove(key);
+  return { ok: true };
+}
+
 // Message routing from popup + content scripts
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   (async () => {
@@ -197,6 +215,15 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           return;
         case "generate":
           sendResponse(await generate(msg.length));
+          return;
+        case "session-get":
+          sendResponse(await sessionGet(msg.key));
+          return;
+        case "session-set":
+          sendResponse(await sessionSet(msg.key, msg.value));
+          return;
+        case "session-remove":
+          sendResponse(await sessionRemove(msg.key));
           return;
         default:
           sendResponse({ ok: false, error: "unknown-message" });

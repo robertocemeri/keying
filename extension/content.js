@@ -11,6 +11,33 @@
   let currentPw = null;
   let currentAnchor = null;
 
+  // Route session storage through the SW. Direct chrome.storage.session.set
+  // from a content script races setAccessLevel on SW cold-start; going via
+  // sendMessage is always privileged so it never trips on access checks.
+  async function sessionGet(key) {
+    try {
+      const r = await chrome.runtime.sendMessage({ type: "session-get", key });
+      return r?.ok ? r.value : null;
+    } catch {
+      return null;
+    }
+  }
+  async function sessionSet(key, value) {
+    try {
+      await chrome.runtime.sendMessage({ type: "session-set", key, value });
+    } catch {
+      /* SW may not be reachable on a freshly-loaded extension; the worst case
+         is that the save banner skips this submit. */
+    }
+  }
+  async function sessionRemove(key) {
+    try {
+      await chrome.runtime.sendMessage({ type: "session-remove", key });
+    } catch {
+      /* ignore */
+    }
+  }
+
   function isPasswordInput(el) {
     return el instanceof HTMLInputElement && el.type === "password";
   }
@@ -141,17 +168,11 @@
     }
     // Remember which entry was just filled — used to pre-select the right
     // entry when the 2FA page appears on the next navigation.
-    try {
-      await chrome.storage.session.set({
-        ["lastFill:" + HOST]: {
-          id: item.id,
-          hasTotp: !!item.hasTotp,
-          ts: Date.now(),
-        },
-      });
-    } catch {
-      /* ignore */
-    }
+    await sessionSet("lastFill:" + HOST, {
+      id: item.id,
+      hasTotp: !!item.hasTotp,
+      ts: Date.now(),
+    });
     toast("Filled from Keying");
   }
 
@@ -299,14 +320,9 @@
 
   async function pickEntryIdForTotp() {
     // Prefer the entry that was just used to fill creds on this host
-    try {
-      const data = await chrome.storage.session.get("lastFill:" + HOST);
-      const fill = data["lastFill:" + HOST];
-      if (fill && Date.now() - fill.ts < 5 * 60_000) {
-        return fill.id;
-      }
-    } catch {
-      /* ignore */
+    const fill = await sessionGet("lastFill:" + HOST);
+    if (fill && Date.now() - fill.ts < 5 * 60_000) {
+      return fill.id;
     }
     // Fallback: a single TOTP-enabled entry for this host
     try {
@@ -354,11 +370,7 @@
       otp.focus();
       dispatchInput(otp, r.code);
       toast("2FA code filled");
-      try {
-        await chrome.storage.session.remove("lastFill:" + HOST);
-      } catch {
-        /* ignore */
-      }
+      await sessionRemove("lastFill:" + HOST);
     });
   }
 
@@ -498,19 +510,13 @@
 
   async function storePending(username, password) {
     if (!password) return;
-    try {
-      await chrome.storage.session.set({
-        [PENDING_KEY]: {
-          username: username || "",
-          password,
-          url: location.origin,
-          title: deriveTitle(),
-          ts: Date.now(),
-        },
-      });
-    } catch {
-      /* storage may be unavailable in some contexts */
-    }
+    await sessionSet(PENDING_KEY, {
+      username: username || "",
+      password,
+      url: location.origin,
+      title: deriveTitle(),
+      ts: Date.now(),
+    });
   }
 
   function deriveTitle() {
@@ -582,16 +588,10 @@
   );
 
   async function checkPendingSave() {
-    let pending;
-    try {
-      const data = await chrome.storage.session.get(PENDING_KEY);
-      pending = data[PENDING_KEY];
-    } catch {
-      return;
-    }
+    const pending = await sessionGet(PENDING_KEY);
     if (!pending) return;
     if (Date.now() - pending.ts > PENDING_TTL_MS) {
-      await chrome.storage.session.remove(PENDING_KEY);
+      await sessionRemove(PENDING_KEY);
       return;
     }
     // If there's still a VISIBLE, empty password field on this page, we're
@@ -611,7 +611,7 @@
           (m) => (m.username || "") === (pending.username || "")
         );
         if (exact) {
-          await chrome.storage.session.remove(PENDING_KEY);
+          await sessionRemove(PENDING_KEY);
           return;
         }
       }
@@ -669,11 +669,7 @@
     }
 
     cancel.addEventListener("click", async () => {
-      try {
-        await chrome.storage.session.remove(PENDING_KEY);
-      } catch {
-        /* ignore */
-      }
+      await sessionRemove(PENDING_KEY);
       cleanup();
     });
 
@@ -689,11 +685,7 @@
           password: pending.password,
         },
       });
-      try {
-        await chrome.storage.session.remove(PENDING_KEY);
-      } catch {
-        /* ignore */
-      }
+      await sessionRemove(PENDING_KEY);
       cleanup();
       if (r?.ok) toast("Saved to Keying");
       else if (r?.error === "duplicate") toast("Already in Keying");
