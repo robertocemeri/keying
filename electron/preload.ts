@@ -116,6 +116,7 @@ const api = {
   updaterStatus: () => ipcRenderer.invoke("updater:status"),
   updaterCheck: () => ipcRenderer.invoke("updater:check"),
   updaterInstall: () => ipcRenderer.invoke("updater:install"),
+  updaterRepair: () => ipcRenderer.invoke("updater:repair"),
   appVersion: () => ipcRenderer.invoke("app:version"),
   onUpdaterStatus: (cb: (status: unknown) => void) => {
     const listener = (_e: unknown, status: unknown) => cb(status);

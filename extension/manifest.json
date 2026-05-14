@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Keying",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Autofill from your local Keying vault. No cloud, no account — credentials live in the Keying app on your Mac.",
   "homepage_url": "https://github.com/robertocemeri/keying",
   "author": "Roberto Cemeri",

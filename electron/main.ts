@@ -69,6 +69,8 @@ import {
   installNow,
   getUpdateStatus,
   getCurrentVersion,
+  repairUpdateBlocker,
+  maybeWarnAtStartup,
 } from "./updater";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -91,7 +93,6 @@ app.setName("Keying");
 
 let mainWindow: BrowserWindow | null = null;
 let autoLockTimer: NodeJS.Timeout | null = null;
-let isQuitting = false;
 
 function pinRegularActivationPolicy(): void {
   if (process.platform !== "darwin") return;
@@ -161,19 +162,16 @@ function createWindow() {
     mainWindow?.show();
   });
 
-  // Red ❌ on macOS should hide the window, not destroy it. Destroying the
-  // only top-level window leaves the app with just the overlay (skipTaskbar)
-  // — macOS then removes the Dock entry entirely. Hiding keeps the app
-  // visible in the Dock so ⌘-tab / Dock click can bring it back.
-  mainWindow.on("close", (e) => {
-    if (!isQuitting && process.platform === "darwin") {
-      e.preventDefault();
-      mainWindow?.hide();
-      // Lock the vault when the user closes the window — same security
-      // behavior as before, just without destroying the BrowserWindow.
-      lock();
-      clearAutoLockTimer();
-      broadcast("vault:auto-locked");
+  // Red ❌ quits the app. The previous "hide instead of destroy" behavior was
+  // a workaround for macOS removing the Dock entry — but users (reasonably)
+  // expect X to actually close the app, and the lingering hidden window
+  // confuses ⌘-Tab. The activation-policy pin + saved Dock shortcut handle
+  // Dock persistence the right way; we don't need the hidden-window hack.
+  mainWindow.on("close", () => {
+    lock();
+    clearAutoLockTimer();
+    if (process.platform === "darwin") {
+      app.quit();
     }
   });
 
@@ -292,6 +290,9 @@ app.whenReady().then(async () => {
     }
   });
 
+  // Surface translocation / quarantine first so the user can fix it before
+  // checkOnStartup() runs against a doomed install.
+  await maybeWarnAtStartup();
   void checkOnStartup();
 });
 
@@ -300,8 +301,6 @@ app.on("window-all-closed", () => {
 });
 
 app.on("before-quit", async () => {
-  isQuitting = true;
-  // (kept the rest of the handler below)
   globalShortcut.unregisterAll();
   destroyOverlay();
   try {
@@ -733,4 +732,5 @@ ipcMain.handle("updater:install", async () => {
   await installNow();
   return { ok: true };
 });
+ipcMain.handle("updater:repair", async () => await repairUpdateBlocker());
 ipcMain.handle("app:version", () => getCurrentVersion());

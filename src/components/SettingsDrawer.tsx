@@ -709,6 +709,24 @@ function AboutSection() {
     await window.vault.updaterInstall();
   }
 
+  const [repairing, setRepairing] = useState(false);
+  const [repairResult, setRepairResult] = useState<string | null>(null);
+  async function repair() {
+    setRepairing(true);
+    setRepairResult(null);
+    try {
+      const r = await window.vault.updaterRepair();
+      if (r.ok) {
+        setRepairResult("Cleared. Quit Keying and reopen it from /Applications to finish.");
+      } else {
+        setRepairResult(`Couldn't repair: ${r.message ?? "unknown error"}`);
+      }
+    } finally {
+      setRepairing(false);
+    }
+  }
+
+  const isBlocked = status.state === "blocked";
   const statusLabel = (() => {
     switch (status.state) {
       case "idle":
@@ -725,13 +743,27 @@ function AboutSection() {
         return `Update ${status.version} ready — restart to install.`;
       case "error":
         return `Update check failed: ${status.message}`;
+      case "blocked":
+        return status.reason === "translocated"
+          ? "Auto-update is blocked — macOS is running Keying from a temporary read-only copy."
+          : "Auto-update is blocked — the .app bundle is still quarantined by macOS.";
     }
   })();
 
   return (
     <>
       <Card title="Updates" description="Keying checks for new versions automatically. You can also check manually.">
-        <div className="text-sm text-ink-300">{statusLabel}</div>
+        <div className={`text-sm ${isBlocked ? "text-amber-300" : "text-ink-300"}`}>{statusLabel}</div>
+        {isBlocked && status.state === "blocked" && (
+          <div className="text-xs text-ink-400 leading-relaxed">
+            Until this is fixed, "Restart & install" will silently fail — macOS reverts the
+            update on relaunch. App on disk:{" "}
+            <code className="text-ink-300">{status.appPath || "(not found)"}</code>
+          </div>
+        )}
+        {repairResult && (
+          <div className="text-xs text-ink-300">{repairResult}</div>
+        )}
         <div className="flex flex-wrap gap-2">
           <button
             onClick={check}
@@ -746,6 +778,15 @@ function AboutSection() {
               className="no-drag bg-accent-500 hover:bg-accent-400 text-ink-950 text-sm font-medium rounded-md px-3.5 py-1.5 transition"
             >
               Restart & install
+            </button>
+          )}
+          {isBlocked && status.state === "blocked" && status.canFix && (
+            <button
+              onClick={repair}
+              disabled={repairing}
+              className="no-drag bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-ink-950 text-sm font-medium rounded-md px-3.5 py-1.5 transition"
+            >
+              {repairing ? "Repairing…" : "Repair auto-update"}
             </button>
           )}
         </div>

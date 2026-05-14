@@ -52,7 +52,8 @@ export type UpdateStatus =
   | { state: "not-available"; version: string }
   | { state: "downloading"; percent: number }
   | { state: "ready"; version: string }
-  | { state: "error"; message: string };
+  | { state: "error"; message: string }
+  | { state: "blocked"; reason: "translocated" | "quarantined"; appPath: string; canFix: boolean };
 
 export type PairedClient = {
   client: string;
@@ -139,6 +140,7 @@ declare global {
       updaterStatus(): Promise<UpdateStatus>;
       updaterCheck(): Promise<UpdateStatus>;
       updaterInstall(): Promise<{ ok: true }>;
+      updaterRepair(): Promise<{ ok: boolean; message?: string }>;
       appVersion(): Promise<string>;
       onUpdaterStatus(cb: (status: UpdateStatus) => void): () => void;
     };
