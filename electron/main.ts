@@ -91,6 +91,7 @@ app.setName("Keying");
 
 let mainWindow: BrowserWindow | null = null;
 let autoLockTimer: NodeJS.Timeout | null = null;
+let isQuitting = false;
 
 function broadcast(channel: string, ...args: unknown[]) {
   for (const w of BrowserWindow.getAllWindows()) {
@@ -154,6 +155,22 @@ function createWindow() {
     mainWindow?.show();
   });
 
+  // Red ❌ on macOS should hide the window, not destroy it. Destroying the
+  // only top-level window leaves the app with just the overlay (skipTaskbar)
+  // — macOS then removes the Dock entry entirely. Hiding keeps the app
+  // visible in the Dock so ⌘-tab / Dock click can bring it back.
+  mainWindow.on("close", (e) => {
+    if (!isQuitting && process.platform === "darwin") {
+      e.preventDefault();
+      mainWindow?.hide();
+      // Lock the vault when the user closes the window — same security
+      // behavior as before, just without destroying the BrowserWindow.
+      lock();
+      clearAutoLockTimer();
+      broadcast("vault:auto-locked");
+    }
+  });
+
   mainWindow.on("closed", () => {
     mainWindow = null;
     lock();
@@ -167,6 +184,15 @@ app.whenReady().then(async () => {
   // override needed). In a packaged build the bundle is Keying.app and the
   // .icns is set via electron-builder's mac.icon. Either way, no setIcon
   // call here.
+  //
+  // Force the app to always present as a regular Dock app. The overlay
+  // window's setVisibleOnAllWorkspaces({ visibleOnFullScreen: true }) call
+  // can cause macOS to shift the app's activation policy to "accessory"
+  // (menubar-only, no Dock icon) as a side effect — even while the main
+  // window is still visible. Pinning the policy here prevents that.
+  if (process.platform === "darwin" && app.setActivationPolicy) {
+    app.setActivationPolicy("regular");
+  }
 
   setOverlayDev(isDev);
   createOverlay();
@@ -252,7 +278,14 @@ app.whenReady().then(async () => {
   createWindow();
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    // Dock click / ⌘-tab back to Keying: re-show the hidden main window or
+    // create a fresh one if it was actually destroyed.
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.show();
+      mainWindow.focus();
+    } else if (BrowserWindow.getAllWindows().filter((w) => !w.isDestroyed() && !w.webContents.getURL().includes("/overlay")).length === 0) {
+      createWindow();
+    }
   });
 
   void checkOnStartup();
@@ -263,6 +296,8 @@ app.on("window-all-closed", () => {
 });
 
 app.on("before-quit", async () => {
+  isQuitting = true;
+  // (kept the rest of the handler below)
   globalShortcut.unregisterAll();
   destroyOverlay();
   try {
