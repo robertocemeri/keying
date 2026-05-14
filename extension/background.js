@@ -5,6 +5,22 @@
 const BRIDGE_URL = "http://127.0.0.1:17321";
 const STORAGE_KEY = "vault.token";
 
+// Content scripts use chrome.storage.session to stash pending logins (so the
+// "Save this login?" banner survives the navigation to the post-login page)
+// and the last-filled entry id (so the 2FA chip knows which entry's TOTP to
+// pull). Default access level for storage.session is TRUSTED_CONTEXTS, which
+// excludes content scripts — without this grant, every read/write from
+// content.js throws and is silently swallowed by its try/catch, so the save
+// banner never appears. Firefox doesn't implement setAccessLevel; the
+// try/catch keeps the SW from crashing there.
+try {
+  chrome.storage.session.setAccessLevel({
+    accessLevel: "TRUSTED_AND_UNTRUSTED_CONTEXTS",
+  });
+} catch {
+  /* not supported (Firefox); content-script storage access stays restricted */
+}
+
 function clientName() {
   // The host app uses this to label the pairing prompt.
   const ua = (globalThis.navigator && navigator.userAgent) || "";

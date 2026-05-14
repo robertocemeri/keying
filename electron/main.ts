@@ -93,6 +93,12 @@ let mainWindow: BrowserWindow | null = null;
 let autoLockTimer: NodeJS.Timeout | null = null;
 let isQuitting = false;
 
+function pinRegularActivationPolicy(): void {
+  if (process.platform !== "darwin") return;
+  if (typeof app.setActivationPolicy !== "function") return;
+  app.setActivationPolicy("regular");
+}
+
 function broadcast(channel: string, ...args: unknown[]) {
   for (const w of BrowserWindow.getAllWindows()) {
     if (!w.isDestroyed()) w.webContents.send(channel, ...args);
@@ -184,18 +190,16 @@ app.whenReady().then(async () => {
   // override needed). In a packaged build the bundle is Keying.app and the
   // .icns is set via electron-builder's mac.icon. Either way, no setIcon
   // call here.
-  //
-  // Force the app to always present as a regular Dock app. The overlay
-  // window's setVisibleOnAllWorkspaces({ visibleOnFullScreen: true }) call
-  // can cause macOS to shift the app's activation policy to "accessory"
-  // (menubar-only, no Dock icon) as a side effect — even while the main
-  // window is still visible. Pinning the policy here prevents that.
-  if (process.platform === "darwin" && app.setActivationPolicy) {
-    app.setActivationPolicy("regular");
-  }
 
   setOverlayDev(isDev);
   createOverlay();
+
+  // Pin the macOS activation policy to "regular" AFTER createOverlay. The
+  // overlay window's setVisibleOnAllWorkspaces({ visibleOnFullScreen: true })
+  // is the side effect that flips the app to "accessory" (menubar-only, no
+  // Dock icon). Setting the policy before creating the overlay loses to that
+  // downgrade; setting it after sticks.
+  pinRegularActivationPolicy();
 
   const registered = globalShortcut.register("Alt+CommandOrControl+K", () => {
     toggleOverlay();

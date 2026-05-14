@@ -1,5 +1,11 @@
-import { BrowserWindow, screen } from "electron";
+import { app, BrowserWindow, screen } from "electron";
 import path from "path";
+
+function pinRegularActivationPolicy(): void {
+  if (process.platform !== "darwin") return;
+  if (typeof app.setActivationPolicy !== "function") return;
+  app.setActivationPolicy("regular");
+}
 
 const WIDTH = 620;
 const HEIGHT = 420;
@@ -44,8 +50,12 @@ export function createOverlay(): void {
     },
   });
 
-  // Keep above other apps (including full-screen)
+  // Keep above other apps (including full-screen). The visibleOnFullScreen
+  // flag is what causes macOS to downgrade the app's activation policy to
+  // "accessory" (no Dock icon) — re-pin to "regular" right after so the
+  // Dock entry survives.
   overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  pinRegularActivationPolicy();
 
   if (isDev) {
     overlayWindow.loadURL("http://localhost:5173/#/overlay");
@@ -71,6 +81,8 @@ export function showOverlay(): void {
   overlayWindow.setBounds({ x, y, width: WIDTH, height: HEIGHT });
   overlayWindow.show();
   overlayWindow.focus();
+  // Defensive: re-pin in case macOS re-applied the accessory downgrade.
+  pinRegularActivationPolicy();
   overlayWindow.webContents.send("overlay:shown");
 }
 
