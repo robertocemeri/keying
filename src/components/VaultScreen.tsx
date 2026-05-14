@@ -57,10 +57,16 @@ export default function VaultScreen({
     const off = window.vault.onGlobalSettingsChanged((g) => {
       setAutofillPaused(!!g.autofillDisabled);
     });
+    // Bridge-side mutations (extension Save Login banner, future bridge edits)
+    // don't go through this renderer, so the only signal we get is this event.
+    const offEntries = window.vault.onEntriesChanged(() => {
+      reload(selectedId ?? null);
+    });
     const onImport = () => reload();
     window.addEventListener("keying:import-complete", onImport);
     return () => {
       off();
+      offEntries();
       window.removeEventListener("keying:import-complete", onImport);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -165,6 +171,19 @@ export default function VaultScreen({
                 ].join(" ")}
               >
                 {autofillPaused ? "Autofill off" : "Autofill on"}
+              </button>
+              <button
+                onClick={() => reload(selectedId ?? null)}
+                title="Refresh entries"
+                aria-label="Refresh"
+                disabled={loading}
+                className="no-drag text-ink-400 hover:text-ink-100 transition disabled:opacity-50"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className={loading ? "animate-spin" : ""}>
+                  <polyline points="23 4 23 10 17 10" />
+                  <polyline points="1 20 1 14 7 14" />
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                </svg>
               </button>
               <button
                 onClick={onOpenSettings}

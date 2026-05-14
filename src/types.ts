@@ -128,6 +128,7 @@ declare global {
       copyToClipboard(value: string): void;
       clearClipboard(): void;
       onLockEvent(cb: () => void): () => void;
+      onEntriesChanged(cb: () => void): () => void;
       onPairingPrompt(cb: (info: { code: string; client: string }) => void): () => void;
       onPairingCompleted(cb: (info: { client: string }) => void): () => void;
       onPairingCancelled(cb: () => void): () => void;

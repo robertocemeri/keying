@@ -440,6 +440,10 @@ async function handle(req: http.IncomingMessage, res: http.ServerResponse): Prom
         notes: "",
         folder: "",
       });
+      // Tell the renderer the vault grew so the list refreshes without a
+      // manual reload. Same channel is reused for any future bridge-side
+      // mutation (edit/delete via the extension, etc.).
+      broadcastToAll("vault:entries-changed");
       sendJson(res, 200, { ok: true, id: created.id });
     } catch {
       sendJson(res, 400, { error: "bad-request" });

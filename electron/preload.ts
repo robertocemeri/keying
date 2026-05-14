@@ -82,6 +82,11 @@ const api = {
     ipcRenderer.on("vault:auto-locked", listener);
     return () => ipcRenderer.removeListener("vault:auto-locked", listener);
   },
+  onEntriesChanged: (cb: () => void) => {
+    const listener = () => cb();
+    ipcRenderer.on("vault:entries-changed", listener);
+    return () => ipcRenderer.removeListener("vault:entries-changed", listener);
+  },
   onPairingPrompt: (cb: (info: { code: string; client: string }) => void) => {
     const listener = (_e: unknown, info: { code: string; client: string }) => cb(info);
     ipcRenderer.on("bridge:pairing-prompt", listener);
