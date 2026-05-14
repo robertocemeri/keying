@@ -1,7 +1,7 @@
 {
   "name": "keying",
   "private": true,
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Keying — a local, encrypted password manager for macOS",
   "main": "dist-electron/main.js",
   "homepage": "https://github.com/robertocemeri/keying",

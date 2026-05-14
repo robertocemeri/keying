@@ -1,6 +1,6 @@
 import { autoUpdater } from "electron-updater";
 import { BrowserWindow, dialog, app } from "electron";
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { promisify } from "util";
 import path from "path";
 
@@ -108,61 +108,74 @@ async function detectUpdateBlocker(): Promise<BlockedStatus | null> {
   return null;
 }
 
-// Called from app.whenReady() — pops a hard dialog when the running app is
-// translocated or quarantined. The user gets a one-click "Repair" that clears
-// quarantine on /Applications/Keying.app, then prompts to quit (because the
-// running instance is still in the translocated path and must be relaunched
-// from /Applications to see the effect).
-export async function maybeWarnAtStartup(): Promise<void> {
-  if (process.platform !== "darwin") return;
-  if (process.env.NODE_ENV === "development") return;
-  const blocker = await detectUpdateBlocker();
-  if (!blocker) return;
+// Called as the VERY FIRST thing in app.whenReady() — before createOverlay /
+// createWindow / pinRegularActivationPolicy / anything else that would put a
+// Dock icon on screen at the translocated path. If the app is running from a
+// translocated location, we clear quarantine on /Applications/Keying.app and
+// auto-relaunch from there, then quit this process. Returns true if the caller
+// should bail out (because we're about to quit and respawn).
+//
+// For the non-translocated-but-quarantined case (rarer: the bundle has the
+// quarantine flag but macOS hasn't translocated it for this run), we just
+// clear the flag silently. No UI, no relaunch needed — the running session is
+// fine; future launches just won't get translocated.
+export async function handleTranslocationEarly(): Promise<boolean> {
+  if (process.platform !== "darwin") return false;
+  if (process.env.NODE_ENV === "development") return false;
 
-  const isTransloc = blocker.reason === "translocated";
-  const detail = isTransloc
-    ? "macOS is running Keying from a temporary read-only copy (App Translocation). This causes: auto-updates fail silently, and each launch may create a new Dock icon. Click Repair to clear the quarantine flag on /Applications/Keying.app, then relaunch from /Applications."
-    : "Your Keying.app bundle is still quarantined by macOS. macOS may translocate the app on the next launch — causing auto-updates to fail and a new Dock icon each time. Click Repair to clear it.";
+  const translocated = isTranslocated();
 
+  // Always try to clean up the canonical bundle's quarantine flag, whether or
+  // not we're translocated right now. Best-effort; no UI on failure.
+  const canonical = "/Applications/Keying.app";
+  if (await hasQuarantineFlag(canonical)) {
+    try {
+      await execAsync(`/usr/bin/xattr -dr com.apple.quarantine ${JSON.stringify(canonical)}`);
+    } catch {
+      /* ignore — we'll surface this in Settings if it persists */
+    }
+  }
+
+  if (!translocated) return false;
+
+  // We're running from /private/var/folders/.../AppTranslocation/... — the
+  // user can't auto-update from here and every launch spawns a new Dock icon.
+  // Quarantine is now cleared on the canonical bundle, so the next launch
+  // from /Applications won't be translocated. Tell the user, then relaunch.
   const choice = await dialog.showMessageBox({
     type: "warning",
-    message: "Keying needs a one-time repair",
-    detail,
-    buttons: ["Repair now", "Skip"],
+    message: "Keying needs to finish setup",
+    detail:
+      "macOS is running Keying from a temporary copy, which prevents auto-updates and creates duplicate Dock icons. " +
+      "Click OK to finish setup — Keying will close and reopen automatically from /Applications.",
+    buttons: ["OK", "Skip"],
     defaultId: 0,
     cancelId: 1,
   });
-  if (choice.response !== 0) return;
+  if (choice.response !== 0) return false;
 
-  const res = await repairUpdateBlocker();
-  if (!res.ok) {
+  // Spawn `open -n -a /Applications/Keying.app` detached so it survives this
+  // process quitting. `-n` forces a new instance; without it, macOS may
+  // foreground the current (translocated) process instead.
+  try {
+    const child = spawn("/usr/bin/open", ["-n", "-a", canonical], {
+      detached: true,
+      stdio: "ignore",
+    });
+    child.unref();
+  } catch (e) {
     await dialog.showMessageBox({
       type: "error",
-      message: "Couldn't repair",
-      detail: res.message ?? "Unknown error. Try moving /Applications/Keying.app to the Trash and reinstalling from the latest DMG.",
+      message: "Couldn't relaunch Keying",
+      detail:
+        (e instanceof Error ? e.message : String(e)) +
+        "\n\nPlease quit Keying manually and reopen it from /Applications.",
       buttons: ["OK"],
     });
-    return;
+    return false;
   }
-
-  if (isTransloc) {
-    const after = await dialog.showMessageBox({
-      type: "info",
-      message: "Repair applied. Quit Keying now?",
-      detail: "The running copy is still in the temporary location. Quit and relaunch Keying from /Applications to finish.",
-      buttons: ["Quit", "Later"],
-      defaultId: 0,
-      cancelId: 1,
-    });
-    if (after.response === 0) app.quit();
-  } else {
-    await dialog.showMessageBox({
-      type: "info",
-      message: "Repair applied.",
-      detail: "Auto-updates and Dock behavior should work normally from now on.",
-      buttons: ["OK"],
-    });
-  }
+  app.quit();
+  return true;
 }
 
 // Removes com.apple.quarantine recursively from the installed .app bundle.

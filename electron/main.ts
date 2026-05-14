@@ -70,7 +70,7 @@ import {
   getUpdateStatus,
   getCurrentVersion,
   repairUpdateBlocker,
-  maybeWarnAtStartup,
+  handleTranslocationEarly,
 } from "./updater";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -183,6 +183,12 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  // FIRST, before any window or Dock-affecting call: if macOS is running us
+  // from a translocated path, clear quarantine on /Applications/Keying.app and
+  // relaunch from there. If this returns true, we're about to quit — don't
+  // bother creating windows that would just show up briefly at the wrong path.
+  if (await handleTranslocationEarly()) return;
+
   // Dock icon: in dev, scripts/setup-dev-icon.mjs swaps the Electron bundle's
   // icon for ours before launch, so macOS uses it natively (no runtime
   // override needed). In a packaged build the bundle is Keying.app and the
@@ -290,9 +296,6 @@ app.whenReady().then(async () => {
     }
   });
 
-  // Surface translocation / quarantine first so the user can fix it before
-  // checkOnStartup() runs against a doomed install.
-  await maybeWarnAtStartup();
   void checkOnStartup();
 });
 
