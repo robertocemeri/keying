@@ -86,6 +86,12 @@ button {
   transition: background 0.12s ease;
 }
 .primary:hover { background: #a3e635; }
+a.primary.as-link {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 8px;
+}
 .ghost {
   width: 100%;
   background: transparent;

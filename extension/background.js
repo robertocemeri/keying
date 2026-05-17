@@ -4,6 +4,16 @@
 
 const BRIDGE_URL = "http://127.0.0.1:17321";
 const STORAGE_KEY = "vault.token";
+const APP_DOWNLOAD_URL = "https://keying.app/";
+
+// On first install, open the download page in a new tab so users discover the
+// companion app — without it the extension can't reach the loopback bridge and
+// silently does nothing. Only fires on "install", not on update.
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (reason === "install") {
+    chrome.tabs.create({ url: APP_DOWNLOAD_URL });
+  }
+});
 
 // Content scripts use chrome.storage.session to stash pending logins (so the
 // "Save this login?" banner survives the navigation to the post-login page)

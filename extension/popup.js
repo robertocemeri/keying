@@ -1,5 +1,11 @@
 const $ = (id) => document.getElementById(id);
 
+const APP_DOWNLOAD_URL = "https://keying.app/";
+const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || "") ||
+  /Mac OS X/.test(navigator.userAgent || "");
+
+$("btn-get-app").href = APP_DOWNLOAD_URL;
+
 async function send(msg) {
   return await chrome.runtime.sendMessage(msg);
 }
@@ -21,12 +27,24 @@ async function refresh() {
   if (!s?.reachable) {
     setPill("Offline", "err");
     show("view-status");
-    $("status-title").textContent = "Keying app not running";
-    $("status-detail").textContent = "Open the Keying app on your Mac, then try again.";
-    $("btn-pair").hidden = true;
-    $("btn-retry").hidden = false;
+    if (!IS_MAC) {
+      $("status-title").textContent = "Keying needs the Mac app";
+      $("status-detail").textContent =
+        "Keying is a local password manager — the browser extension talks to a companion app that currently runs on macOS only.";
+      $("btn-pair").hidden = true;
+      $("btn-get-app").hidden = false;
+      $("btn-retry").hidden = true;
+    } else {
+      $("status-title").textContent = "Keying app not running";
+      $("status-detail").textContent =
+        "Open the Keying app on your Mac, then try again. Don't have it yet?";
+      $("btn-pair").hidden = true;
+      $("btn-get-app").hidden = false;
+      $("btn-retry").hidden = false;
+    }
     return;
   }
+  $("btn-get-app").hidden = true;
 
   const t = await send({ type: "has-token" });
   if (!t.paired) {
